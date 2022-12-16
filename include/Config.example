@@ -1,0 +1,10 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+const char* WIFI_SSID = "";
+const char* WIFI_PASSWORD = "";
+
+// token generated from BotFather
+const char* BOT_TOKEN = "";
+
+#endif  // CONFIG_H

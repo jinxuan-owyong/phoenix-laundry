@@ -1,9 +1,35 @@
 #include <Arduino.h>
 
+#include "Config.h"
+#include "Telegram.h"
+
+WiFiClientSecure secured_client;
+UniversalTelegramBot tgBot(BOT_TOKEN, secured_client);
+unsigned long lastTimeBotRan;
+
 void setup() {
-  // put your setup code here, to run once:
+    Serial.begin(115200);
+
+    // Connect to Wi-Fi
+    WiFi.mode(WIFI_STA);
+    WiFi.disconnect();
+    delay(200);
+
+    while (WiFi.status() != WL_CONNECTED) {
+        Serial.print("Attempting to connect to ");
+        Serial.println(WIFI_SSID);
+        WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+        delay(5000);
+    }
+    Serial.println("Connected to WiFi");
+    Serial.println(WiFi.localIP());
+    secured_client.setCACert(TELEGRAM_CERTIFICATE_ROOT);  // Add root certificate for api.telegram.org
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+    if (millis() > lastTimeBotRan + telegram::BOT_MTBS) {
+        telegram::check_updates(tgBot);
+        lastTimeBotRan = millis();
+    }
+    delay(200);
 }
