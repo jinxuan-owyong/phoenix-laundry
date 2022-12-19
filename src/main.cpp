@@ -4,7 +4,7 @@
 #include "Telegram.h"
 
 WiFiClientSecure secured_client;
-UniversalTelegramBot tgBot(BOT_TOKEN, secured_client);
+UniversalTelegramBot tgBot(config::BOT_TOKEN, secured_client);
 unsigned long lastTimeBotRan;
 
 void setup() {
@@ -17,8 +17,8 @@ void setup() {
 
     while (WiFi.status() != WL_CONNECTED) {
         Serial.print("Attempting to connect to ");
-        Serial.println(WIFI_SSID);
-        WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+        Serial.println(config::WIFI_SSID);
+        WiFi.begin(config::WIFI_SSID, config::WIFI_PASSWORD);
         delay(5000);
     }
     Serial.println("Connected to WiFi");
@@ -31,5 +31,5 @@ void loop() {
         telegram::check_updates(tgBot);
         lastTimeBotRan = millis();
     }
-    delay(200);
+    delay(config::LOOP_DELAY);
 }
