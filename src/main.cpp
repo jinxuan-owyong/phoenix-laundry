@@ -2,6 +2,7 @@
 #include <WiFi.h>
 
 #include "Config.h"
+#include "LaundryRoom.h"
 #include "Telegram.h"
 #include "UniversalTelegramBot.h"
 #include "WiFiClientSecure.h"
@@ -9,6 +10,7 @@
 WiFiClientSecure secured_client;
 UniversalTelegramBot tgBot(config::BOT_TOKEN, secured_client);
 unsigned long lastTimeBotRan;
+laundry::Room phoenix(config::PHOENIX_LAUNDRY_ROOM);
 
 void setup() {
     Serial.begin(115200);

@@ -1,6 +1,10 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <vector>
+
+#include "LaundryRoom.h"
+
 namespace config {
     // General
     const int LOOP_DELAY = 200;
@@ -29,6 +33,13 @@ namespace config {
     // Telegram
     // token generated from BotFather
     const char* BOT_TOKEN = "";
+
+    // Laundry Room
+    std::vector<int> PHOENIX_LAUNDRY_ROOM = {
+        laundry::ID_DRYER_A,
+        laundry::ID_DRYER_B,
+        laundry::ID_WASHER_A,
+        laundry::ID_WASHER_B};
 }
 
 #endif  // CONFIG_H
