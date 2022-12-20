@@ -3,6 +3,8 @@
 
 #include "Config.h"
 #include "Telegram.h"
+#include "UniversalTelegramBot.h"
+#include "WiFiClientSecure.h"
 
 WiFiClientSecure secured_client;
 UniversalTelegramBot tgBot(config::BOT_TOKEN, secured_client);
@@ -49,9 +51,34 @@ void setup() {
 }
 
 void loop() {
-    if (millis() > lastTimeBotRan + telegram::BOT_MTBS) {
-        telegram::check_updates(tgBot);
-        lastTimeBotRan = millis();
+    if (millis() <= lastTimeBotRan + telegram::BOT_MTBS) {
+        delay(config::LOOP_DELAY);
+        return;
     }
-    delay(config::LOOP_DELAY);
+
+    // telegram bot process
+    int numNewMessages = tgBot.getUpdates(tgBot.last_message_received + 1);
+    while (numNewMessages) {
+        Serial.print("new message: ");
+        Serial.println(String(numNewMessages));
+
+        for (int i = 0; i < numNewMessages; i++) {
+            // Chat id of the requester
+            String chat_id = String(tgBot.messages[i].chat_id);
+
+            // Print the received message
+            String text = tgBot.messages[i].text;
+            Serial.println(text);
+
+            if (text == telegram::COMMAND_START) {
+                String from_name = tgBot.messages[i].from_name;
+                tgBot.sendMessage(chat_id, telegram::response_start(from_name), "");
+            } else if (text == telegram::COMMAND_HELP) {
+                tgBot.sendMessage(chat_id, telegram::response_help(), telegram::MARKDOWN);
+            }
+        }
+
+        numNewMessages = tgBot.getUpdates(tgBot.last_message_received + 1);
+    }
+    lastTimeBotRan = millis();
 }
