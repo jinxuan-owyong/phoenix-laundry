@@ -65,21 +65,33 @@ void loop() {
         Serial.println(String(numNewMessages));
 
         for (int i = 0; i < numNewMessages; i++) {
+            auto& curr_msg = tgBot.messages[i];
             // Chat id of the requester
-            String chat_id = String(tgBot.messages[i].chat_id);
+            String chat_id = String(curr_msg.chat_id);
 
             // Print the received message
-            String text = tgBot.messages[i].text;
+            String text = curr_msg.text;
             Serial.println(text);
 
-            if (text == telegram::COMMAND_START) {
-                String from_name = tgBot.messages[i].from_name;
-                tgBot.sendMessage(chat_id, telegram::response_start(from_name), "");
-            } else if (text == telegram::COMMAND_HELP) {
-                tgBot.sendMessage(chat_id, telegram::response_help(), telegram::MARKDOWN);
+            if (curr_msg.type == "callback_query") {
+                if (text.substring(0, 5) == "claim") {  // claiming machine
+                    int claim_id = (text.substring(text.indexOf('-') + 1, text.length())).toInt();
+                    phoenix.claim(claim_id, curr_msg.from_name, curr_msg.from_id);
+                }
+            } else {
+                if (text == telegram::COMMAND_START) {
+                    String from_name = curr_msg.from_name;
+                    tgBot.sendMessage(chat_id, telegram::response_start(from_name), "");
+                } else if (text == telegram::COMMAND_HELP) {
+                    tgBot.sendMessage(chat_id, telegram::response_help(), telegram::MARKDOWN);
+                } else if (text == telegram::COMMAND_CLAIM) {
+                    tgBot.sendMessageWithInlineKeyboard(chat_id,
+                                                        telegram::response_claim(),
+                                                        telegram::MARKDOWN,
+                                                        telegram::keyboard_claim(phoenix));
+                }
             }
         }
-
         numNewMessages = tgBot.getUpdates(tgBot.last_message_received + 1);
     }
     lastTimeBotRan = millis();

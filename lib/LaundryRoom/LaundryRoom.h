@@ -22,25 +22,22 @@ namespace laundry {
     };
 
     class Machine {
-    private:
-        int id;
-        int status = ID_READY;
-        String prev_user = "";
-
     public:
+        int id;
+        int status = ID_IN_USE;
+        String prev_user_name = "";
+        String prev_user_id = "";
         Machine(int name_id);
         String get_name();
         String get_status();
     };
 
     class Room {
-    private:
-        std::vector<Machine> machines;
-
     public:
         Room(std::vector<int> machine_ids);
-        int num_machines;
+        std::vector<Machine> machines;
         String generate_status();
+        void claim(int machine_id, String user_name, String user_id);
     };
 }
 #endif  // LAUNDRY_ROOM_H

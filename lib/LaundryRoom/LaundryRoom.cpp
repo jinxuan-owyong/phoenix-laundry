@@ -4,6 +4,7 @@ namespace laundry {
     Machine::Machine(int name_id) {
         id = name_id;
     }
+
     String Machine::get_name() {
         std::unordered_map<int, String> MACHINE_NAME = {
             {ID_DRYER_A, "Coin Dryer"},
@@ -12,6 +13,7 @@ namespace laundry {
             {ID_WASHER_B, "Coin Washer"}};
         return MACHINE_NAME[id];
     };
+
     String Machine::get_status() {
         std::unordered_map<int, String> MACHINE_STATUS = {
             {ID_IN_USE, "In use"},
@@ -22,8 +24,8 @@ namespace laundry {
 
         String output = MACHINE_STATUS[status];
         if (status == ID_IN_USE || status == ID_DONE) {
-            output += "(";
-            output += prev_user;
+            output += " (";
+            output += prev_user_name;
             output += ")";
         }
 
@@ -35,6 +37,16 @@ namespace laundry {
             machines.emplace_back(Machine(id));
         }
     }
+
+    void Room::claim(int machine_id, String user_name, String user_id) {
+        for (auto& m : machines) {
+            if (m.id == machine_id) {
+                m.prev_user_name = user_name;
+                m.prev_user_id = user_id;
+            }
+        }
+    }
+
     String Room::generate_status() {
         String output = "*Laundry Room Status*";
         for (auto& machine : machines) {
