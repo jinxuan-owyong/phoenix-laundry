@@ -46,15 +46,4 @@ namespace laundry {
             }
         }
     }
-
-    String Room::generate_status() {
-        String output = "*Laundry Room Status*";
-        for (auto& machine : machines) {
-            output += "\n\u2022 ";
-            output += machine.get_name();
-            output += ": ";
-            output += machine.get_status();
-        }
-        return output;
-    }
 }

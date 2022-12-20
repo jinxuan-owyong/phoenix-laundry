@@ -89,6 +89,8 @@ void loop() {
                                                         telegram::response_claim(),
                                                         telegram::MARKDOWN,
                                                         telegram::keyboard_claim(phoenix));
+                } else if (text == telegram::COMMAND_STATUS) {
+                    tgBot.sendMessage(chat_id, telegram::response_status(phoenix), telegram::MARKDOWN);
                 }
             }
         }

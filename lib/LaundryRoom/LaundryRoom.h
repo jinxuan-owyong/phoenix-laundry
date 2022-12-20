@@ -24,7 +24,7 @@ namespace laundry {
     class Machine {
     public:
         int id;
-        int status = ID_IN_USE;
+        int status = ID_READY;
         String prev_user_name = "";
         String prev_user_id = "";
         Machine(int name_id);
@@ -36,7 +36,6 @@ namespace laundry {
     public:
         Room(std::vector<int> machine_ids);
         std::vector<Machine> machines;
-        String generate_status();
         void claim(int machine_id, String user_name, String user_id);
     };
 }

@@ -23,16 +23,27 @@ namespace telegram {
     }
 
     String response_help() {
-        return "\
-*Laundry Bot Help Menu*\n\
-Commands:\n\
-/claim - Tag a dryer/washer to your telegram handle\n\
-/help - Show this message\n\
-/start - Initialise bot\n\
-/help - Show this message\n";
+        String output = "*Laundry Bot Help Menu*\n";
+        output += "Commands:\n";
+        output += "/claim - Tag a dryer/washer to your telegram handle\n";
+        output += "/help - Show this message\n";
+        output += "/start - Initialise bot\n";
+        output += "/status - Get the status of the laundry room";
+        return output;
     }
 
     String response_start(String name) {
         return "Hello " + name + ", welcome to the Laundry Bot! ";
+    }
+
+    String response_status(laundry::Room& rm) {
+        String output = "*Laundry Room Status*";
+        for (auto& machine : rm.machines) {
+            output += "\n\u2022 ";
+            output += machine.get_name();
+            output += ": ";
+            output += machine.get_status();
+        }
+        return output;
     }
 }

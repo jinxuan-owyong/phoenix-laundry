@@ -11,12 +11,14 @@ namespace telegram {
     const String COMMAND_CLAIM = "/claim";
     const String COMMAND_HELP = "/help";
     const String COMMAND_START = "/start";
+    const String COMMAND_STATUS = "/status";
     const String MARKDOWN = "Markdown";
 
     String keyboard_claim(laundry::Room& rm);
     String response_claim();
     String response_help();
     String response_start(String name);
+    String response_status(laundry::Room& rm);
 }
 
 #endif  // TELEGRAM_H
