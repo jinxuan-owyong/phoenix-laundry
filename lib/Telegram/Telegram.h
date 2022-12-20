@@ -3,22 +3,28 @@
 
 #include <Arduino.h>
 
+#include "Config.h"
 #include "LaundryRoom.h"
+#include "UniversalTelegramBot.h"
+#include "WiFiClientSecure.h"
 
 namespace telegram {
-    const unsigned long BOT_MTBS = 1000;  // mean time between scan messages
+    class tg {
+    private:
+        UniversalTelegramBot* bot = NULL;
+        unsigned long lastTimeBotRan = 0;
+        void handle_callback(int msg_number, laundry::Room& rm);
+        void handle_message(int msg_number, laundry::Room& rm);
+        String keyboard_claim(laundry::Room& rm);
+        String response_claim();
+        String response_help();
+        String response_start(String name);
+        String response_status(laundry::Room& rm);
 
-    const String COMMAND_CLAIM = "/claim";
-    const String COMMAND_HELP = "/help";
-    const String COMMAND_START = "/start";
-    const String COMMAND_STATUS = "/status";
-    const String MARKDOWN = "Markdown";
-
-    String keyboard_claim(laundry::Room& rm);
-    String response_claim();
-    String response_help();
-    String response_start(String name);
-    String response_status(laundry::Room& rm);
+    public:
+        tg(const char* token, WiFiClientSecure& client);
+        void check_updates(laundry::Room& rm);
+    };
 }
 
 #endif  // TELEGRAM_H
