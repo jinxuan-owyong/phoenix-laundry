@@ -37,7 +37,7 @@ namespace telegram {
         String text = curr_msg.text;
         if (text.substring(0, 5) == "claim") {  // claiming machine
             int claim_id = (text.substring(text.indexOf('-') + 1, text.length())).toInt();
-            rm.claim(claim_id, curr_msg.from_name, curr_msg.from_id);
+            rm.claim(claim_id, laundry::User(curr_msg.from_name, curr_msg.from_id));
         }
     }
     void tg::handle_message(int msg_number, laundry::Room& rm) {

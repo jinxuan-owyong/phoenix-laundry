@@ -1,8 +1,14 @@
 #include "LaundryRoom.h"
 
 namespace laundry {
+    User::User(String n, String i) {
+        name = n;
+        id = i;
+    }
+
     Machine::Machine(int name_id) {
         id = name_id;
+        users.assign(2, User());
     }
 
     String Machine::get_name() {
@@ -25,7 +31,7 @@ namespace laundry {
         String output = MACHINE_STATUS[status];
         if (status == ID_IN_USE || status == ID_DONE) {
             output += " (";
-            output += prev_user_name;
+            output += users[CURR_USER].name;
             output += ")";
         }
 
@@ -38,11 +44,11 @@ namespace laundry {
         }
     }
 
-    void Room::claim(int machine_id, String user_name, String user_id) {
+    void Room::claim(int machine_id, User u) {
         for (auto& m : machines) {
             if (m.id == machine_id) {
-                m.prev_user_name = user_name;
-                m.prev_user_id = user_id;
+                std::swap(m.users[PREV_USER], m.users[CURR_USER]);
+                m.users[CURR_USER] = u;
             }
         }
     }
