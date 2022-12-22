@@ -15,6 +15,8 @@ namespace config {
     public:
         // General
         const int LOOP_DELAY = 200;
+        const int PING_INTERVAL = 10 * 60 * 1000;  // 10 minutes
+        const char* PING_TARGET_IP = "8.8.8.8";
 
         // WiFi
         // To be set according to WiFi network type

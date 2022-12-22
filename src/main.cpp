@@ -2,6 +2,7 @@
 #include <WiFi.h>
 
 #include "Config.h"
+#include "ESP32Ping.h"
 #include "LaundryRoom.h"
 #include "Telegram.h"
 #include "WiFiClientSecure.h"
@@ -9,7 +10,7 @@
 config::cfg constants;
 WiFiClientSecure secured_client;
 telegram::tg tgBot(constants.BOT_TOKEN, secured_client);
-unsigned long lastTimeBotRan;
+unsigned long lastTimeBotRan = 0, lastPingTime = 0;
 laundry::Room phoenix(constants.PHOENIX_LAUNDRY_ROOM);
 
 void setup() {
@@ -53,11 +54,19 @@ void setup() {
 }
 
 void loop() {
-    if (millis() <= lastTimeBotRan + constants.BOT_MTBS) {
-        delay(constants.LOOP_DELAY);
-        return;
+    // WiFi keep-alive service
+    if (millis() > lastPingTime + constants.PING_INTERVAL) {
+        bool success = Ping.ping(constants.PING_TARGET_IP);
+        if (!success) {
+            ESP.restart();
+        }
+        lastPingTime = millis();
     }
 
     // telegram bot process
-    tgBot.check_updates(phoenix);
+    if (millis() > lastTimeBotRan + constants.BOT_MTBS) {
+        tgBot.check_updates(phoenix);
+    }
+
+    delay(constants.LOOP_DELAY);
 }
