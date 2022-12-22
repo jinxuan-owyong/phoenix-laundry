@@ -62,21 +62,32 @@ namespace telegram {
         return "Which machine would you like to claim?";
     }
 
-    String tg::keyboard_claim(laundry::Room& rm) {
+    String tg::generate_inline_keyboard(std::vector<inlineKeyboardButton>& buttons) {
         String keyboardJson = "[";
-        for (int i = 0; i < rm.machines.size(); ++i) {
+        for (int i = 0; i < buttons.size(); ++i) {
             keyboardJson += "[{\"text\" : ";
-            keyboardJson += "\"" + rm.machines[i].get_name() + "\",";
+            keyboardJson += "\"" + buttons[i].text + "\",";
             keyboardJson += "\"callback_data\" : ";
-            keyboardJson += "\"claim-" + String(rm.machines[i].id) + "\"";
+            keyboardJson += "\"" + buttons[i].callback_data + "\"";
             keyboardJson += "}]";
 
-            if (i != rm.machines.size() - 1) {
+            if (i != buttons.size() - 1) {
                 keyboardJson += ",";
             }
         }
         keyboardJson += "]";
         return keyboardJson;
+    }
+
+    String tg::keyboard_claim(laundry::Room& rm) {
+        std::vector<inlineKeyboardButton> buttons;
+        for (auto& machine : rm.machines) {
+            inlineKeyboardButton b = {
+                .text = machine.get_name(),
+                .callback_data = "claim-" + String(machine.id)};
+            buttons.emplace_back(b);
+        }
+        return generate_inline_keyboard(buttons);
     }
 
     String tg::response_help() {

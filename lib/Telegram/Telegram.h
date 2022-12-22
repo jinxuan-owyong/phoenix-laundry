@@ -9,12 +9,19 @@
 #include "WiFiClientSecure.h"
 
 namespace telegram {
+    // https://core.telegram.org/bots/api#inlinekeyboardmarkup
+    struct inlineKeyboardButton {
+        String text;
+        String callback_data;
+    };
+
     class tg {
     private:
         UniversalTelegramBot* bot = NULL;
         unsigned long lastTimeBotRan = 0;
         void handle_callback(int msg_number, laundry::Room& rm);
         void handle_message(int msg_number, laundry::Room& rm);
+        String generate_inline_keyboard(std::vector<inlineKeyboardButton>& buttons);
         String keyboard_claim(laundry::Room& rm);
         String response_claim();
         String response_help();
