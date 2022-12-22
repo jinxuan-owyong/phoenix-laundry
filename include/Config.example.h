@@ -40,6 +40,7 @@ namespace config {
         const String COMMAND_HELP = "/help";
         const String COMMAND_START = "/start";
         const String COMMAND_STATUS = "/status";
+        const String COMMAND_UNCLAIM = "/unclaim";
         const String MARKDOWN = "Markdown";
         const String CALLBACK_QUERY = "callback_query";
 

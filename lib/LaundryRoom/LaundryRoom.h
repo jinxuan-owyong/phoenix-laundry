@@ -44,7 +44,9 @@ namespace laundry {
     public:
         Room(std::vector<int> machine_ids);
         std::vector<Machine> machines;
+        std::vector<Machine> get_claimed_machines(String id);
         void claim(int machine_id, User u);
+        void unclaim(int machine_id, User u);
     };
 }
 #endif  // LAUNDRY_ROOM_H

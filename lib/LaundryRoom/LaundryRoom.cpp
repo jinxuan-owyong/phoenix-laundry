@@ -44,11 +44,31 @@ namespace laundry {
         }
     }
 
+    std::vector<Machine> Room::get_claimed_machines(String id) {
+        std::vector<laundry::Machine> claimed;
+        for (auto& m : machines) {
+            if (m.users[laundry::CURR_USER].id == id) {
+                claimed.emplace_back(m);
+            }
+        }
+        return claimed;
+    }
+
     void Room::claim(int machine_id, User u) {
         for (auto& m : machines) {
             if (m.id == machine_id) {
                 std::swap(m.users[PREV_USER], m.users[CURR_USER]);
                 m.users[CURR_USER] = u;
+            }
+        }
+    }
+
+    void Room::unclaim(int machine_id, User u) {
+        for (auto& m : machines) {
+            if (m.id == machine_id &&
+                u.id == m.users[CURR_USER].id) {  // confirm user's id matches machine
+                m.users[CURR_USER] = User();
+                std::swap(m.users[PREV_USER], m.users[CURR_USER]);
             }
         }
     }

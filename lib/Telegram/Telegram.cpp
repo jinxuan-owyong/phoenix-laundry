@@ -39,7 +39,12 @@ namespace telegram {
             int claim_id = (text.substring(text.indexOf('-') + 1, text.length())).toInt();
             rm.claim(claim_id, laundry::User(curr_msg.from_name, curr_msg.from_id));
         }
+        if (text.substring(0, 7) == "unclaim") {  // unclaim machine
+            int unclaim_id = (text.substring(text.indexOf('-') + 1, text.length())).toInt();
+            rm.unclaim(unclaim_id, laundry::User(curr_msg.from_name, curr_msg.from_id));
+        }
     }
+
     void tg::handle_message(int msg_number, laundry::Room& rm) {
         auto& curr_msg = bot->messages[msg_number];
         String text = curr_msg.text;
@@ -56,10 +61,13 @@ namespace telegram {
                                                keyboard_claim(rm));
         } else if (text == constants.COMMAND_STATUS) {
             bot->sendMessage(chat_id, response_status(rm), constants.MARKDOWN);
+        } else if (text == constants.COMMAND_UNCLAIM) {
+            auto claimed = rm.get_claimed_machines(curr_msg.from_id);
+            bot->sendMessageWithInlineKeyboard(chat_id,
+                                               response_unclaim(claimed),
+                                               constants.MARKDOWN,
+                                               keyboard_unclaim(claimed));
         }
-    }
-    String tg::response_claim() {
-        return "Which machine would you like to claim?";
     }
 
     String tg::generate_inline_keyboard(std::vector<inlineKeyboardButton>& buttons) {
@@ -90,6 +98,21 @@ namespace telegram {
         return generate_inline_keyboard(buttons);
     }
 
+    String tg::keyboard_unclaim(std::vector<laundry::Machine>& claimed) {
+        std::vector<inlineKeyboardButton> buttons;
+        for (auto& m : claimed) {
+            inlineKeyboardButton b = {
+                .text = m.get_name(),
+                .callback_data = "unclaim-" + String(m.id)};
+            buttons.emplace_back(b);
+        }
+        return generate_inline_keyboard(buttons);
+    }
+
+    String tg::response_claim() {
+        return "Which machine would you like to claim?";
+    }
+
     String tg::response_help() {
         String output = "*Laundry Bot Help Menu*\n";
         output += "Commands:\n";
@@ -97,6 +120,7 @@ namespace telegram {
         output += "/help - Show this message\n";
         output += "/start - Initialise bot\n";
         output += "/status - Get the status of the laundry room";
+        output += "/unclaim - Untag a dryer/washer that you accidentally claimed";
         return output;
     }
 
@@ -113,5 +137,13 @@ namespace telegram {
             output += machine.get_status();
         }
         return output;
+    }
+
+    String tg::response_unclaim(std::vector<laundry::Machine>& claimed) {
+        if (claimed.size() == 0) {
+            return "You have not claimed any machines.";
+        }
+
+        return "Which machine would you like to unclaim?";
     }
 }
