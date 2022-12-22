@@ -10,7 +10,7 @@
 config::cfg constants;
 WiFiClientSecure secured_client;
 telegram::tg tgBot(constants.BOT_TOKEN, secured_client);
-unsigned long lastTimeBotRan = 0, lastPingTime = 0;
+unsigned long lastPingTime = 0;
 laundry::Room phoenix(constants.PHOENIX_LAUNDRY_ROOM);
 
 void setup() {
@@ -64,7 +64,7 @@ void loop() {
     }
 
     // telegram bot process
-    if (millis() > lastTimeBotRan + constants.BOT_MTBS) {
+    if (millis() > tgBot.lastTimeBotRan + constants.BOT_MTBS) {
         tgBot.check_updates(phoenix);
     }
 
