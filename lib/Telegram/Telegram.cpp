@@ -37,11 +37,19 @@ namespace telegram {
         String text = curr_msg.text;
         if (text.substring(0, 5) == "claim") {  // claiming machine
             int claim_id = (text.substring(text.indexOf('-') + 1, text.length())).toInt();
-            rm.claim(claim_id, laundry::User(curr_msg.from_name, curr_msg.from_id));
+            String res = rm.claim(claim_id, laundry::User(curr_msg.from_name, curr_msg.from_id));
+            bot->answerCallbackQuery(curr_msg.query_id,
+                                     res != ""
+                                         ? "Successfully claimed " + res
+                                         : "");
         }
         if (text.substring(0, 7) == "unclaim") {  // unclaim machine
             int unclaim_id = (text.substring(text.indexOf('-') + 1, text.length())).toInt();
-            rm.unclaim(unclaim_id, laundry::User(curr_msg.from_name, curr_msg.from_id));
+            String res = rm.unclaim(unclaim_id, laundry::User(curr_msg.from_name, curr_msg.from_id));
+            bot->answerCallbackQuery(curr_msg.query_id,
+                                     res != ""
+                                         ? "Successfully unclaimed " + res
+                                         : "You have not claimed this machine");
         }
     }
 

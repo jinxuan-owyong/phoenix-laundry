@@ -54,22 +54,28 @@ namespace laundry {
         return claimed;
     }
 
-    void Room::claim(int machine_id, User u) {
+    String Room::claim(int machine_id, User u) {
+        String claimed = "";
         for (auto& m : machines) {
             if (m.id == machine_id) {
                 std::swap(m.users[PREV_USER], m.users[CURR_USER]);
                 m.users[CURR_USER] = u;
+                claimed = m.get_name();
             }
         }
+        return claimed;
     }
 
-    void Room::unclaim(int machine_id, User u) {
+    String Room::unclaim(int machine_id, User u) {
+        String unclaimed = "";
         for (auto& m : machines) {
             if (m.id == machine_id &&
                 u.id == m.users[CURR_USER].id) {  // confirm user's id matches machine
+                unclaimed = m.get_name();
                 m.users[CURR_USER] = User();
                 std::swap(m.users[PREV_USER], m.users[CURR_USER]);
             }
         }
+        return unclaimed;
     }
 }
