@@ -29,7 +29,7 @@ namespace laundry {
             {ID_OUT_OF_ORDER, "Out of order"}};
 
         String output = MACHINE_STATUS[status];
-        if (status == ID_IN_USE || status == ID_DONE) {
+        if (users[CURR_USER].name != "") {
             output += " (";
             output += users[CURR_USER].name;
             output += ")";
