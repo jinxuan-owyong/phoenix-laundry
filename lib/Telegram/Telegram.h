@@ -22,6 +22,7 @@ namespace telegram {
         UniversalTelegramBot* bot = NULL;
         void handle_callback(int msg_number, laundry::Room& rm);
         void handle_message(int msg_number, laundry::Room& rm);
+        static bool is_command(const String& msg, const String& cmd);
         String generate_inline_keyboard(std::vector<inlineKeyboardButton>& buttons);
         String keyboard_claim(laundry::Room& rm);
         String keyboard_unclaim(std::vector<laundry::Machine>& claimed);

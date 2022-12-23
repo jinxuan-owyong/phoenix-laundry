@@ -58,25 +58,29 @@ namespace telegram {
         auto& curr_msg = bot->messages[msg_number];
         String text = curr_msg.text;
         String chat_id = String(curr_msg.chat_id);
-        if (text == constants.COMMAND_START) {
+        if (is_command(text, constants.COMMAND_START)) {
             String from_name = curr_msg.from_name;
             bot->sendMessage(chat_id, response_start(from_name), "");
-        } else if (text == constants.COMMAND_HELP) {
+        } else if (is_command(text, constants.COMMAND_HELP)) {
             bot->sendMessage(chat_id, response_help(), constants.MARKDOWN);
-        } else if (text == constants.COMMAND_CLAIM) {
+        } else if (is_command(text, constants.COMMAND_CLAIM)) {
             bot->sendMessageWithInlineKeyboard(chat_id,
                                                response_claim(),
                                                constants.MARKDOWN,
                                                keyboard_claim(rm));
-        } else if (text == constants.COMMAND_STATUS) {
+        } else if (is_command(text, constants.COMMAND_STATUS)) {
             bot->sendMessage(chat_id, response_status(rm), constants.MARKDOWN);
-        } else if (text == constants.COMMAND_UNCLAIM) {
+        } else if (is_command(text, constants.COMMAND_UNCLAIM)) {
             auto claimed = rm.get_claimed_machines(curr_msg.from_id);
             bot->sendMessageWithInlineKeyboard(chat_id,
                                                response_unclaim(claimed),
                                                constants.MARKDOWN,
                                                keyboard_unclaim(claimed));
         }
+    }
+
+    bool tg::is_command(const String& msg, const String& cmd) {
+        return (cmd == msg || cmd == msg.substring(0, cmd.length()));
     }
 
     String tg::generate_inline_keyboard(std::vector<inlineKeyboardButton>& buttons) {
