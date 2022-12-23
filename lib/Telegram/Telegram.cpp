@@ -128,7 +128,7 @@ namespace telegram {
         output += "/claim - Tag a dryer/washer to your telegram handle\n";
         output += "/help - Show this message\n";
         output += "/start - Initialise bot\n";
-        output += "/status - Get the status of the laundry room";
+        output += "/status - Get the status of the laundry room\n";
         output += "/unclaim - Untag a dryer/washer that you accidentally claimed";
         return output;
     }
