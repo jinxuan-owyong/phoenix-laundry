@@ -159,4 +159,8 @@ namespace telegram {
 
         return "Which machine would you like to unclaim?";
     }
+
+    void tg::send_message(String msg, String target, String keyboard) {
+        bot->sendMessageWithInlineKeyboard(target, msg, constants.MARKDOWN, keyboard);
+    }
 }
