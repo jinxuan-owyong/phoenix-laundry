@@ -12,10 +12,33 @@ WiFiClientSecure secured_client;
 telegram::tg tgBot(constants.BOT_TOKEN, secured_client);
 unsigned long lastPingTime = 0;
 laundry::Room phoenix(constants.PHOENIX_LAUNDRY_ROOM);
+void setup_wifi();
 
 void setup() {
     Serial.begin(115200);
+    setup_wifi();
+    secured_client.setCACert(TELEGRAM_CERTIFICATE_ROOT);  // Add root certificate for api.telegram.org
+}
 
+void loop() {
+    // WiFi keep-alive service
+    if (millis() > lastPingTime + constants.PING_INTERVAL) {
+        bool success = Ping.ping(constants.PING_TARGET_IP);
+        if (!success) {
+            ESP.restart();
+        }
+        lastPingTime = millis();
+    }
+
+    // telegram bot process
+    if (millis() > tgBot.lastTimeBotRan + constants.BOT_MTBS) {
+        tgBot.check_updates(phoenix);
+    }
+
+    delay(constants.LOOP_DELAY);
+}
+
+void setup_wifi() {
     // Connect to Wi-Fi
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
@@ -50,23 +73,4 @@ void setup() {
 
     Serial.println("\nConnected to WiFi");
     Serial.println(WiFi.localIP());
-    secured_client.setCACert(TELEGRAM_CERTIFICATE_ROOT);  // Add root certificate for api.telegram.org
-}
-
-void loop() {
-    // WiFi keep-alive service
-    if (millis() > lastPingTime + constants.PING_INTERVAL) {
-        bool success = Ping.ping(constants.PING_TARGET_IP);
-        if (!success) {
-            ESP.restart();
-        }
-        lastPingTime = millis();
-    }
-
-    // telegram bot process
-    if (millis() > tgBot.lastTimeBotRan + constants.BOT_MTBS) {
-        tgBot.check_updates(phoenix);
-    }
-
-    delay(constants.LOOP_DELAY);
 }
