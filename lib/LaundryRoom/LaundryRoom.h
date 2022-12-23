@@ -25,7 +25,7 @@ namespace laundry {
 
     class User {
     public:
-        User(String n = "", String i = "", String u = "");
+        User(String _name = "", String _id = "", String _username = "");
         String name;
         String id;
         String username;

@@ -8,10 +8,10 @@ namespace laundry {
      * @param i User's ID.
      * @param u User's username.
      */
-    User::User(String n, String i, String u) {
-        name = n;
-        id = i;
-        username = u;
+    User::User(String _name, String _id, String _username) {
+        name = _name;
+        id = _id;
+        username = _username;
     }
 
     /**
