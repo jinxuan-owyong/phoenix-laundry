@@ -35,9 +35,10 @@ namespace telegram {
     void tg::handle_callback(int msg_number, laundry::Room& rm) {
         auto& curr_msg = bot->messages[msg_number];
         String text = curr_msg.text;
+        laundry::User curr_user(curr_msg.from_name, curr_msg.from_id, curr_msg.username);
         if (text.substring(0, 5) == "claim") {  // claiming machine
             int claim_id = (text.substring(text.indexOf('-') + 1, text.length())).toInt();
-            String res = rm.claim(claim_id, laundry::User(curr_msg.from_name, curr_msg.from_id));
+            String res = rm.claim(claim_id, curr_user);
             bot->answerCallbackQuery(curr_msg.query_id,
                                      res != ""
                                          ? "Successfully claimed " + res
@@ -45,7 +46,7 @@ namespace telegram {
         }
         if (text.substring(0, 7) == "unclaim") {  // unclaim machine
             int unclaim_id = (text.substring(text.indexOf('-') + 1, text.length())).toInt();
-            String res = rm.unclaim(unclaim_id, laundry::User(curr_msg.from_name, curr_msg.from_id));
+            String res = rm.unclaim(unclaim_id, curr_user);
             bot->answerCallbackQuery(curr_msg.query_id,
                                      res != ""
                                          ? "Successfully unclaimed " + res

@@ -25,9 +25,10 @@ namespace laundry {
 
     class User {
     public:
-        User(String n = "", String i = "");
+        User(String n = "", String i = "", String u = "");
         String name;
         String id;
+        String username;
     };
 
     class Machine {

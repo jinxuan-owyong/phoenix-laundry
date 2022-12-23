@@ -1,9 +1,10 @@
 #include "LaundryRoom.h"
 
 namespace laundry {
-    User::User(String n, String i) {
+    User::User(String n, String i, String u) {
         name = n;
         id = i;
+        username = u;
     }
 
     Machine::Machine(int name_id) {
@@ -32,6 +33,7 @@ namespace laundry {
         if (users[CURR_USER].name != "") {
             output += " (";
             output += users[CURR_USER].name;
+            output += " - @" + users[CURR_USER].username;
             output += ")";
         }
 
