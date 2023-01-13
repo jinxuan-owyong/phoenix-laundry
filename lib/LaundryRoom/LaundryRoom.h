@@ -53,6 +53,19 @@ namespace laundry {
         int refresh_machine_status(int machine_id, String* debug = NULL);
     };
 
+    static std::unordered_map<int, String> MACHINE_STATUS = {
+        {ID_IN_USE, "In use"},
+        {ID_FINISHING, "Finishing"},
+        {ID_DONE, "Done"},
+        {ID_READY, "Ready"},
+        {ID_OUT_OF_ORDER, "Out of order"}};
+
+    static std::unordered_map<int, String> MACHINE_NAME = {
+        {ID_DRYER_A, "Coin Dryer"},
+        {ID_DRYER_B, "QR Dryer"},
+        {ID_WASHER_A, "QR Washer"},
+        {ID_WASHER_B, "Coin Washer"}};
+
     // ADC 2 is reserved for WiFi
     static std::unordered_map<int, int> MACHINE_INPUT_PIN = {
         {laundry::ID_DRYER_A, 32},  // only dryer a in use

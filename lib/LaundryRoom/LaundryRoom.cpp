@@ -30,11 +30,6 @@ namespace laundry {
      * @return String
      */
     String Machine::get_name() {
-        std::unordered_map<int, String> MACHINE_NAME = {
-            {ID_DRYER_A, "Coin Dryer"},
-            {ID_DRYER_B, "QR Dryer"},
-            {ID_WASHER_A, "QR Washer"},
-            {ID_WASHER_B, "Coin Washer"}};
         return MACHINE_NAME[id];
     };
 
@@ -44,13 +39,6 @@ namespace laundry {
      * @return String
      */
     String Machine::get_status() {
-        std::unordered_map<int, String> MACHINE_STATUS = {
-            {ID_IN_USE, "In use"},
-            {ID_FINISHING, "Finishing"},
-            {ID_DONE, "Done"},
-            {ID_READY, "Ready"},
-            {ID_OUT_OF_ORDER, "Out of order"}};
-
         String output = MACHINE_STATUS[status];
         // add user's details if machine is claimed
         if (users[CURR_USER].name != "") {
