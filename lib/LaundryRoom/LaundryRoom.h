@@ -48,6 +48,22 @@ namespace laundry {
         std::vector<Machine> get_claimed_machines(String id);
         String claim(int machine_id, User u);
         String unclaim(int machine_id, User u);
+        String get_machine_status(int machine_id);
+        void set_machine_status(int machine_id, int status);
+        int refresh_machine_status(int machine_id, String* debug = NULL);
     };
+
+    // ADC 2 is reserved for WiFi
+    static std::unordered_map<int, int> MACHINE_INPUT_PIN = {
+        {laundry::ID_DRYER_A, 32},  // only dryer a in use
+        {laundry::ID_DRYER_B, 0},
+        {laundry::ID_WASHER_A, 0},
+        {laundry::ID_WASHER_B, 0}};
+
+    static const int SCAN_INTERVAL = 100;     // time taken for each scan
+    static const int SCAN_THRESHOLD = 1600;   // threshold for LED state
+    static const int SCAN_NUM_READINGS = 10;  // total readings to take
+    static const int THRESHOLD_CONSTANT = 7;
+    static const int THRESHOLD_BLINKING = 2;  // blink frequency = 1/second
 }
 #endif  // LAUNDRY_ROOM_H

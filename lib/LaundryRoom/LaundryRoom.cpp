@@ -128,4 +128,70 @@ namespace laundry {
         }
         return unclaimed;
     }
+
+    /**
+     * @brief Fetch the status of the given machine id
+     *
+     * @param machine_id The machine's ID.
+     * @return String
+     */
+    String Room::get_machine_status(int machine_id) {
+        for (auto& m : machines) {
+            if (m.id == machine_id) {
+                return m.get_status();
+            }
+        }
+        return "Unknown";
+    }
+
+    /**
+     * @brief Fetch the status of the given machine id
+     *
+     * @param machine_id The machine's ID.
+     * @param status The status of the machine
+     */
+    void Room::set_machine_status(int machine_id, int status) {
+        for (auto& m : machines) {
+            if (m.id == machine_id) {
+                m.status = status;
+                break;
+            }
+        }
+    }
+
+    /**
+     * @brief Refresh the status of the given machine id
+     *
+     * @param machine_id The machine's ID.
+     * @return int
+     */
+    int Room::refresh_machine_status(int machine_id, String* debug) {
+        int count_high = 0;
+        int count_low = 0;
+        for (int i = 0; i < SCAN_NUM_READINGS; ++i) {
+            int reading = analogRead(MACHINE_INPUT_PIN[machine_id]);
+            if (reading > SCAN_THRESHOLD) {
+                ++count_high;
+            } else {
+                ++count_low;
+            }
+            delay(SCAN_INTERVAL);
+        }
+
+        // additional information
+        if (debug != NULL) {
+            *debug += "High: " + String(count_high) + " ";
+            *debug += "Low: " + String(count_low);
+        }
+
+        // identify machine state
+        if (abs(count_high - count_low) <= THRESHOLD_BLINKING) {
+            return laundry::ID_FINISHING;
+        } else if (count_high >= THRESHOLD_CONSTANT) {
+            return laundry::ID_IN_USE;
+        } else if (count_low >= THRESHOLD_CONSTANT) {
+            return laundry::ID_READY;
+        }
+        return laundry::ID_OUT_OF_ORDER;
+    }
 }
