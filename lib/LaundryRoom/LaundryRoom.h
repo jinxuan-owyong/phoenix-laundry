@@ -6,23 +6,9 @@
 #include <unordered_map>
 #include <vector>
 
-namespace laundry {
-    enum {
-        PREV_USER = 0,
-        CURR_USER = 1,
-        // Status IDs
-        ID_IN_USE,
-        ID_FINISHING,
-        ID_DONE,
-        ID_READY,
-        ID_OUT_OF_ORDER,
-        // Machine IDs
-        ID_DRYER_A,
-        ID_DRYER_B,
-        ID_WASHER_A,
-        ID_WASHER_B
-    };
+#include "LaundryConfig.h"
 
+namespace laundry {
     class User {
     public:
         User(String _name = "", String _id = "", String _username = "");
@@ -42,8 +28,12 @@ namespace laundry {
     };
 
     class Room {
+    private:
+        config_t cfg;
+        std::unordered_map<int, int> input_pin;
+
     public:
-        Room(std::vector<int> machine_ids);
+        Room(std::vector<int> machine_ids, config_t config);
         std::vector<Machine> machines;
         std::vector<Machine> get_claimed_machines(String id);
         String claim(int machine_id, User u);
@@ -66,17 +56,5 @@ namespace laundry {
         {ID_WASHER_A, "QR Washer"},
         {ID_WASHER_B, "Coin Washer"}};
 
-    // ADC 2 is reserved for WiFi
-    static std::unordered_map<int, int> MACHINE_INPUT_PIN = {
-        {laundry::ID_DRYER_A, 32},  // only dryer a in use
-        {laundry::ID_DRYER_B, 0},
-        {laundry::ID_WASHER_A, 0},
-        {laundry::ID_WASHER_B, 0}};
-
-    static const int SCAN_INTERVAL = 100;     // time taken for each scan
-    static const int SCAN_THRESHOLD = 1600;   // threshold for LED state
-    static const int SCAN_NUM_READINGS = 10;  // total readings to take
-    static const int THRESHOLD_CONSTANT = 7;
-    static const int THRESHOLD_BLINKING = 2;  // blink frequency = 1/second
 }
 #endif  // LAUNDRY_ROOM_H

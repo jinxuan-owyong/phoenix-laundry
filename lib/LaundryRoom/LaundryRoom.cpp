@@ -56,7 +56,13 @@ namespace laundry {
      *
      * @param machine_ids Machines present in the room.
      */
-    Room::Room(std::vector<int> machine_ids) {
+    Room::Room(std::vector<int> machine_ids, config_t config) {
+        cfg = config;
+        input_pin[ID_DRYER_A] = config.PIN_DRYER_A;
+        input_pin[ID_DRYER_B] = config.PIN_DRYER_B;
+        input_pin[ID_WASHER_A] = config.PIN_WASHER_A;
+        input_pin[ID_WASHER_B] = config.PIN_WASHER_B;
+
         for (auto& id : machine_ids) {
             machines.emplace_back(Machine(id));
         }
@@ -156,14 +162,14 @@ namespace laundry {
     int Room::refresh_machine_status(int machine_id, String* debug) {
         int count_high = 0;
         int count_low = 0;
-        for (int i = 0; i < SCAN_NUM_READINGS; ++i) {
-            int reading = analogRead(MACHINE_INPUT_PIN[machine_id]);
-            if (reading > SCAN_THRESHOLD) {
+        for (int i = 0; i < cfg.SCAN_NUM_READINGS; ++i) {
+            int reading = analogRead(input_pin[machine_id]);
+            if (reading > cfg.SCAN_THRESHOLD) {
                 ++count_high;
             } else {
                 ++count_low;
             }
-            delay(SCAN_INTERVAL);
+            delay(cfg.SCAN_INTERVAL);
         }
 
         // additional information
@@ -173,11 +179,11 @@ namespace laundry {
         }
 
         // identify machine state
-        if (abs(count_high - count_low) <= THRESHOLD_BLINKING) {
+        if (abs(count_high - count_low) <= cfg.THRESHOLD_BLINKING) {
             return laundry::ID_FINISHING;
-        } else if (count_high >= THRESHOLD_CONSTANT) {
+        } else if (count_high >= cfg.THRESHOLD_CONSTANT) {
             return laundry::ID_IN_USE;
-        } else if (count_low >= THRESHOLD_CONSTANT) {
+        } else if (count_low >= cfg.THRESHOLD_CONSTANT) {
             return laundry::ID_READY;
         }
         return laundry::ID_OUT_OF_ORDER;

@@ -1,9 +1,11 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <Arduino.h>
+
 #include <vector>
 
-#include "LaundryRoom.h"
+#include "LaundryConfig.h"
 
 namespace config {
     enum {
@@ -50,6 +52,8 @@ namespace config {
             laundry::ID_DRYER_B,
             laundry::ID_WASHER_A,
             laundry::ID_WASHER_B};
+
+        const int TIME_BETWEEN_SCANS = 1 * 60 * 1000;  // 1 minute interval
     };
 }
 
