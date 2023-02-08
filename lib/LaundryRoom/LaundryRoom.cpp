@@ -124,6 +124,21 @@ namespace laundry {
     }
 
     /**
+     * @brief Fetch the name of the given machine id
+     *
+     * @param machine_id The machine's ID.
+     * @return String
+     */
+    String Room::get_machine_name(int machine_id) {
+        for (auto& m : machines) {
+            if (m.id == machine_id) {
+                return m.get_name();
+            }
+        }
+        return "Unknown";
+    }
+
+    /**
      * @brief Fetch the status of the given machine id
      *
      * @param machine_id The machine's ID.
@@ -187,5 +202,40 @@ namespace laundry {
             return laundry::ID_READY;
         }
         return laundry::ID_OUT_OF_ORDER;
+    }
+
+    /**
+     * @brief Get the top reading from n readings
+     *
+     * @param n Number of readings
+     * @param threshold Minimum readings to be considered accurate
+     * @param machine_id The machine's ID.
+     * @return int
+     */
+    int Room::get_best_result(int n, int threshold, int machine_id, String* debug) {
+        std::unordered_map<int, int> results;
+        results[laundry::ID_IN_USE] = 0;
+        results[laundry::ID_FINISHING] = 0;
+        results[laundry::ID_READY] = 0;
+        results[laundry::ID_OUT_OF_ORDER] = 0;
+
+        for (int i = 0; i < n; ++i) {
+            int state = refresh_machine_status(machine_id, debug);
+            if (debug != NULL) {
+                *debug += "Reading " + String(i) + ": " + String(state) + "\n";
+            }
+            ++results[state];
+            delay(cfg.SCAN_INTERVAL);
+        }
+
+        auto best_result = results.begin();
+        for (auto it = ++results.begin(); it != results.end(); ++it) {
+            if (it->second >= threshold && it->second > best_result->second) {  // count >= threshold
+                best_result = it;
+            }
+        }
+
+        // possible bug: all results are not the best
+        return best_result->first;
     }
 }

@@ -38,9 +38,11 @@ namespace laundry {
         std::vector<Machine> get_claimed_machines(String id);
         String claim(int machine_id, User u);
         String unclaim(int machine_id, User u);
+        String get_machine_name(int machine_id);
         String get_machine_status(int machine_id);
         void set_machine_status(int machine_id, int status);
         int refresh_machine_status(int machine_id, String* debug = NULL);
+        int get_best_result(int n, int threshold, int machine_id, String* debug = NULL);
     };
 
     static std::unordered_map<int, String> MACHINE_STATUS = {
