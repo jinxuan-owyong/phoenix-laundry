@@ -31,12 +31,12 @@ namespace telegram {
         String response_start(String name);
         String response_status(laundry::Room& rm);
         String response_unclaim(std::vector<laundry::Machine>& claimed);
-        void send_message(String msg, String target, String keyboard = "");
 
     public:
         tg(const char* token, WiFiClientSecure& client);
         unsigned long lastTimeBotRan = 0;
         void check_updates(laundry::Room& rm);
+        void send_message(String msg, String target, String keyboard = "");
     };
 }
 
