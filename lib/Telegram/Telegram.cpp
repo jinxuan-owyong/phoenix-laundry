@@ -1,7 +1,6 @@
 #include "Telegram.h"
 
 namespace telegram {
-    config::cfg constants;
     /**
      * @brief Construct a new tg::tg object.
      *
@@ -33,7 +32,7 @@ namespace telegram {
                 String text = curr_msg.text;
                 Serial.println(text);
 
-                if (curr_msg.type == constants.CALLBACK_QUERY) {
+                if (curr_msg.type == config::CALLBACK_QUERY) {
                     handle_callback(i, rm);
                 } else {
                     handle_message(i, rm);
@@ -82,23 +81,23 @@ namespace telegram {
         auto& curr_msg = bot->messages[msg_number];
         String text = curr_msg.text;
         String chat_id = String(curr_msg.chat_id);
-        if (is_command(text, constants.COMMAND_START)) {
+        if (is_command(text, config::COMMAND_START)) {
             String from_name = curr_msg.from_name;
             bot->sendMessage(chat_id, response_start(from_name), "");
-        } else if (is_command(text, constants.COMMAND_HELP)) {
-            bot->sendMessage(chat_id, response_help(), constants.MARKDOWN);
-        } else if (is_command(text, constants.COMMAND_CLAIM)) {
+        } else if (is_command(text, config::COMMAND_HELP)) {
+            bot->sendMessage(chat_id, response_help(), config::MARKDOWN);
+        } else if (is_command(text, config::COMMAND_CLAIM)) {
             bot->sendMessageWithInlineKeyboard(chat_id,
                                                response_claim(),
-                                               constants.MARKDOWN,
+                                               config::MARKDOWN,
                                                keyboard_claim(rm));
-        } else if (is_command(text, constants.COMMAND_STATUS)) {
-            bot->sendMessage(chat_id, response_status(rm), constants.MARKDOWN);
-        } else if (is_command(text, constants.COMMAND_UNCLAIM)) {
+        } else if (is_command(text, config::COMMAND_STATUS)) {
+            bot->sendMessage(chat_id, response_status(rm), config::MARKDOWN);
+        } else if (is_command(text, config::COMMAND_UNCLAIM)) {
             auto claimed = rm.get_claimed_machines(curr_msg.from_id);
             bot->sendMessageWithInlineKeyboard(chat_id,
                                                response_unclaim(claimed),
-                                               constants.MARKDOWN,
+                                               config::MARKDOWN,
                                                keyboard_unclaim(claimed));
         }
     }
@@ -246,6 +245,6 @@ namespace telegram {
      * @param keyboard InlineKeyboardMarkup JSON string, optional.
      */
     void tg::send_message(String msg, String target, String keyboard) {
-        bot->sendMessageWithInlineKeyboard(target, msg, constants.MARKDOWN, keyboard);
+        bot->sendMessageWithInlineKeyboard(target, msg, config::MARKDOWN, keyboard);
     }
 }
