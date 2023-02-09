@@ -4,9 +4,9 @@ namespace laundry {
     /**
      * @brief Construct a new User:: User object.
      *
-     * @param n User's name.
-     * @param i User's ID.
-     * @param u User's username.
+     * @param _name User's name.
+     * @param _id User's ID.
+     * @param _username User's username.
      */
     User::User(String _name, String _id, String _username) {
         name = _name;
@@ -34,12 +34,12 @@ namespace laundry {
     };
 
     /**
-     * @brief Get the string corresponding to the status' ID.
+     * @brief Get the string corresponding to the status' ID
      *
      * @return String
      */
     String Machine::get_status() {
-        String output = MACHINE_STATUS[status];
+        String output = MACHINE_STATUS[curr_status];
         // add user's details if machine is claimed
         if (users[CURR_USER].name != "") {
             output += " (";
@@ -49,6 +49,46 @@ namespace laundry {
         }
 
         return output;
+    }
+
+    /**
+     * @brief Get the string corresponding to the machine's ID.
+     *
+     * @return String
+     */
+    String Machine::get_user_id() {
+        return users[CURR_USER].id;
+    };
+
+    /**
+     * @brief Check if the machine cycle is complete.
+     *
+     * @return bool
+     */
+    bool Machine::has_completed_cycle() {
+        bool completed = (prev_status == ID_FINISHING) && (curr_status == ID_READY);
+        if (completed && status_updated == READY) {
+            status_updated = AWAITING;  // sends message to user when awaiting
+        }
+        return completed;
+    }
+
+    /**
+     * @brief Get whether the user has been informed on the cycle completion.
+     *
+     * @return bool
+     */
+    int Machine::get_status_updated() {
+        return status_updated;
+    }
+
+    /**
+     * @brief Set whether the user has been informed on the cycle completion.
+     *
+     * @param state The desired state.
+     */
+    void Machine::set_status_updated(int state) {
+        status_updated = state;
     }
 
     /**
@@ -154,15 +194,41 @@ namespace laundry {
     }
 
     /**
-     * @brief Fetch the status of the given machine id
+     * @brief Fetch the user's telegram id the given machine id
+     *
+     * @param machine_id The machine's ID.
+     * @return String
+     */
+    String Room::get_user_id(int machine_id) {
+        for (auto& m : machines) {
+            if (m.id == machine_id) {
+                return m.get_user_id();
+            }
+        }
+        return "Unknown";
+    }
+
+    /**
+     * @brief Set the status of the given machine id
      *
      * @param machine_id The machine's ID.
      * @param status The status of the machine
      */
     void Room::set_machine_status(int machine_id, int status) {
         for (auto& m : machines) {
+            // reset user data on cycle start
+            if (m.has_completed_cycle() && status == ID_IN_USE) {
+                m.set_status_updated(READY);
+                if (m.users[CURR_USER].notified) {  // new cycle unclaimed
+                    m.users[PREV_USER] = m.users[CURR_USER];
+                    m.users[CURR_USER] = User();
+                }
+            }
+
             if (m.id == machine_id) {
-                m.status = status;
+                // store previous status to check cycle completion
+                m.prev_status = m.curr_status;
+                m.curr_status = status;
                 break;
             }
         }
@@ -194,14 +260,12 @@ namespace laundry {
         }
 
         // identify machine state
-        if (abs(count_high - count_low) <= cfg.THRESHOLD_BLINKING) {
-            return laundry::ID_FINISHING;
-        } else if (count_high >= cfg.THRESHOLD_CONSTANT) {
+        if (count_high >= cfg.THRESHOLD_CONSTANT) {
             return laundry::ID_IN_USE;
         } else if (count_low >= cfg.THRESHOLD_CONSTANT) {
             return laundry::ID_READY;
         }
-        return laundry::ID_OUT_OF_ORDER;
+        return laundry::ID_FINISHING;
     }
 
     /**
@@ -217,7 +281,7 @@ namespace laundry {
         results[laundry::ID_IN_USE] = 0;
         results[laundry::ID_FINISHING] = 0;
         results[laundry::ID_READY] = 0;
-        results[laundry::ID_OUT_OF_ORDER] = 0;
+        // results[laundry::ID_OUT_OF_ORDER] = 0;
 
         for (int i = 0; i < n; ++i) {
             int state = refresh_machine_status(machine_id, debug);
@@ -237,5 +301,26 @@ namespace laundry {
 
         // possible bug: all results are not the best
         return best_result->first;
+    }
+
+    /**
+     * @brief Get the list of machines which have completed their cycle,
+     *        but user has not been informed
+     *
+     * @return std::vector<Machine>
+     */
+    std::vector<Machine> Room::get_completed_machines() {
+        std::vector<Machine> result;
+        for (auto& m : machines) {
+            if (m.has_completed_cycle() &&
+                m.get_status_updated() == AWAITING &&
+                !m.users[CURR_USER].notified) {
+                m.set_status_updated(UPDATED);
+                // prevent double message if another user forgets to claim machine
+                m.users[CURR_USER].notified = true;
+                result.emplace_back(m);
+            }
+        }
+        return result;
     }
 }

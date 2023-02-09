@@ -30,6 +30,9 @@ void setup() {
         prev_status[input] = laundry::ID_READY;
         prev_update[input] = -1 * config::TIME_BETWEEN_SCANS;
     }
+    if (config::DEPLOY_ENV == config::DEVELOPMENT) {
+        tgBot.send_message("Bot started.", config::GROUP_ID_DEV);
+    }
 }
 
 void loop() {
@@ -67,6 +70,22 @@ void loop() {
     // Send debug message
     if (message != "" && config::DEPLOY_ENV) {
         tgBot.send_message(message, config::GROUP_ID_DEV);
+    }
+
+    // update users on cycle completion
+    auto completed_machines = phoenix.get_completed_machines();
+    for (auto& m : completed_machines) {
+        String msg = "✅ " + m.get_name() + " done!";
+        String user_id = m.get_user_id();
+
+        if (!user_id.isEmpty()) {  // send message to user
+            tgBot.send_message(msg, m.get_user_id());
+        } else {  // send message to group
+            tgBot.send_message(msg, (config::DEPLOY_ENV == config::PRODUCTION)
+                                        ? config::GROUP_ID_PROD
+                                        : config::GROUP_ID_DEV);
+        }
+        delay(config::MESSAGE_INTERVAL);
     }
 
     // telegram bot process

@@ -15,16 +15,23 @@ namespace laundry {
         String name;
         String id;
         String username;
+        bool notified = false;
     };
 
     class Machine {
     public:
         int id;
-        int status = ID_READY;
+        int curr_status = ID_READY;
+        int prev_status = ID_FINISHING;
+        int status_updated = UPDATED;
         std::vector<User> users;
         Machine(int name_id);
         String get_name();
         String get_status();
+        String get_user_id();
+        int get_status_updated();
+        void set_status_updated(int state);
+        bool has_completed_cycle();
     };
 
     class Room {
@@ -40,9 +47,11 @@ namespace laundry {
         String unclaim(int machine_id, User u);
         String get_machine_name(int machine_id);
         String get_machine_status(int machine_id);
+        String get_user_id(int machine_id);
         void set_machine_status(int machine_id, int status);
         int refresh_machine_status(int machine_id, String* debug = NULL);
         int get_best_result(int n, int threshold, int machine_id, String* debug = NULL);
+        std::vector<Machine> get_completed_machines();
     };
 
     static std::unordered_map<int, String> MACHINE_STATUS = {
