@@ -17,8 +17,9 @@ namespace config {
 
     // General
     static const int LOOP_DELAY = 200;
-    static const int PING_INTERVAL = 10 * 60 * 1000;  // 10 minutes
-    static const char* PING_TARGET_IP = "8.8.8.8";
+    static const int PING_INTERVAL = 3 * 60 * 1000;             // 3 minutes
+    static const String PING_TARGET_ADDRESS = ".pool.ntp.org";  // add prefix 0, 1, 2, 3
+    static const int PING_RETRY_LIMIT = 4;                      // max prefix 3 for ping address
     static const int DEPLOY_ENV = DEVELOPMENT;
 
     // WiFi

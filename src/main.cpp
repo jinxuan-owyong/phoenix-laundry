@@ -38,12 +38,23 @@ void setup() {
 void loop() {
     // WiFi keep-alive service
     if (millis() > lastPingTime + config::PING_INTERVAL) {
-        bool success = Ping.ping(config::PING_TARGET_IP);
-        if (!success) {
+        bool is_online = false;
+        for (int i = 0; i < config::PING_RETRY_LIMIT && !is_online; ++i) {
+            IPAddress ip;
+            int dns_success = WiFi.hostByName((String(i) + config::PING_TARGET_ADDRESS).c_str(), ip);  // check for DNS failure
+            bool ping_success = Ping.ping(ip);                                                         // check connection
+            Serial.println(ip.toString());
+            Serial.println(dns_success);
+            Serial.println(ping_success);
+
+            is_online = (dns_success == 1) && ping_success;
+            lastPingTime = millis();
+            delay(config::LOOP_DELAY);
+        }
+        if (!is_online) {
             Serial.println("Ping failed.");
             ESP.restart();
         }
-        lastPingTime = millis();
     }
 
     // scan for updated machine status
