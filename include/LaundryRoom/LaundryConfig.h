@@ -1,6 +1,8 @@
 #ifndef LAUNDRY_CONFIG_H
 #define LAUNDRY_CONFIG_H
 
+#include <unordered_map>
+
 namespace laundry {
     enum {
         PREV_USER = 0,
@@ -27,7 +29,7 @@ namespace laundry {
         int SCAN_THRESHOLD = 1600;    // threshold for LED state (12-bit ADC)
         int SCAN_NUM_READINGS = 100;  // total readings to take
         int THRESHOLD_CONSTANT = 70;
-        // int THRESHOLD_BLINKING = 15;  // blink frequency = 1/second
+
         int PIN_DRYER_A;  // ADC input pins
         int PIN_DRYER_B;  // ADC 2 is reserved for WiFi, use ADC 1 pins
         int PIN_WASHER_A;
@@ -40,6 +42,19 @@ namespace laundry {
             PIN_WASHER_B = _PIN_WASHER_B;
         }
     };
+
+    static std::unordered_map<int, String> MACHINE_STATUS = {
+        {ID_IN_USE, "In use"},
+        {ID_FINISHING, "Finishing"},
+        {ID_DONE, "Done"},
+        {ID_READY, "Ready"},
+        {ID_OUT_OF_ORDER, "Out of order"}};
+
+    static std::unordered_map<int, String> MACHINE_NAME = {
+        {ID_DRYER_A, "Coin Dryer"},
+        {ID_DRYER_B, "QR Dryer"},
+        {ID_WASHER_A, "QR Washer"},
+        {ID_WASHER_B, "Coin Washer"}};
 }
 
 #endif

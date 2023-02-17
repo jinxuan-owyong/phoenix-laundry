@@ -1,10 +1,10 @@
 #include <Arduino.h>
 #include <WiFi.h>
 
-#include "Config.h"
+#include "Config/Config.h"
 #include "ESP32Ping.h"
-#include "LaundryRoom.h"
-#include "Telegram.h"
+#include "LaundryRoom/LaundryRoom.h"
+#include "Telegram/Telegram.h"
 #include "WiFiClientSecure.h"
 
 // general
