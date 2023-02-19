@@ -18,21 +18,16 @@ unsigned long lastPingTime = 0;
 // laundry room
 laundry::config_t room_config(config::INPUT_DRYER_A, config::INPUT_DRYER_B, -1, -1);
 laundry::Room phoenix(config::PHOENIX_LAUNDRY_ROOM, room_config);
-std::unordered_map<int, int> prev_status;
-std::unordered_map<int, int> prev_update;
 std::vector<int> GPIO_INPUT = {laundry::ID_DRYER_A, laundry::ID_DRYER_B};
 
 void setup() {
     Serial.begin(115200);
     setup_wifi();
     secured_client.setCACert(TELEGRAM_CERTIFICATE_ROOT);  // Add root certificate for api.telegram.org
-    for (auto& input : GPIO_INPUT) {                      // trigger status update on startup
-        prev_status[input] = laundry::ID_READY;
-        prev_update[input] = -1 * config::TIME_BETWEEN_SCANS;
-    }
     if (config::DEPLOY_ENV == config::DEVELOPMENT) {
         tgBot.send_message("Bot started.", config::GROUP_ID_DEV);
     }
+    phoenix.refreshMachines(NULL);
 }
 
 void loop() {
@@ -59,22 +54,11 @@ void loop() {
 
     // scan for updated machine status
     String message = "";
-    for (auto& input : GPIO_INPUT) {
-        if (millis() > prev_update[input] + config::TIME_BETWEEN_SCANS) {
+    if (millis() > phoenix.getLastUpdated() + config::TIME_BETWEEN_SCANS) {
+        for (auto& gpioPin : config::PHOENIX_LAUNDRY_ROOM) {
             String debug = "\n";
-            int status = phoenix.get_best_result(config::NUM_READINGS,
-                                                 config::BEST_THRESHOLD,
-                                                 input,
-                                                 &debug);
-            if (status != prev_status[input]) {
-                phoenix.set_machine_status(input, status);
-                prev_status[input] = status;
-                message += "Status updated (";
-                message += phoenix.get_machine_name(input) + "): ";
-                message += phoenix.get_machine_status(input) + "\n";
-                message += debug + (debug != "" ? "\n" : "");
-            }
-            prev_update[input] = millis();
+            phoenix.refreshMachines(&debug);
+            message += debug + (debug != "" ? "\n" : "");
         }
     }
 
@@ -84,13 +68,13 @@ void loop() {
     }
 
     // update users on cycle completion
-    auto completed_machines = phoenix.get_completed_machines();
+    auto completed_machines = phoenix.getCompletedMachines();
     for (auto& m : completed_machines) {
-        String msg = "✅ " + m.get_name() + " done!";
-        String user_id = m.get_user_id();
+        String msg = "✅ " + m.getName() + " done!";
+        String userId = m.getCurrUser().getTelegramId();
 
-        if (!user_id.isEmpty()) {  // send message to user
-            tgBot.send_message(msg, m.get_user_id());
+        if (!userId.isEmpty()) {  // send message to user
+            tgBot.send_message(msg, userId);
         } else {  // send message to group
             tgBot.send_message(msg, (config::DEPLOY_ENV == config::PRODUCTION)
                                         ? config::GROUP_ID_PROD

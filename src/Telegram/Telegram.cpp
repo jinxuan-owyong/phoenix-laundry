@@ -24,15 +24,15 @@ namespace telegram {
             Serial.println(String(numNewMessages));
 
             for (int i = 0; i < numNewMessages; i++) {
-                auto& curr_msg = bot->messages[i];
+                auto& currMsg = bot->messages[i];
                 // Chat id of the requester
-                String chat_id = String(curr_msg.chat_id);
+                String chat_id = String(currMsg.chat_id);
 
                 // Print the received message
-                String text = curr_msg.text;
+                String text = currMsg.text;
                 Serial.println(text);
 
-                if (curr_msg.type == config::CALLBACK_QUERY) {
+                if (currMsg.type == config::CALLBACK_QUERY) {
                     handle_callback(i, rm);
                 } else {
                     handle_message(i, rm);
@@ -50,23 +50,20 @@ namespace telegram {
      * @param rm The laundry room instance to reference.
      */
     void tg::handle_callback(int msg_number, laundry::Room& rm) {
-        auto& curr_msg = bot->messages[msg_number];
-        String text = curr_msg.text;
-        laundry::User curr_user(curr_msg.from_name, curr_msg.from_id, curr_msg.username);
+        auto& currMsg = bot->messages[msg_number];
+        String text = currMsg.text;
+        laundry::User currUser(currMsg.from_name, currMsg.from_id, currMsg.username);
         if (text.substring(0, 5) == "claim") {  // claiming machine
-            int claim_id = (text.substring(text.indexOf('-') + 1, text.length())).toInt();
-            String res = rm.claim(claim_id, curr_user);
-            bot->answerCallbackQuery(curr_msg.query_id,
-                                     res != ""
-                                         ? "Successfully claimed " + res
-                                         : "");
+            laundry::MachineID claimId = (laundry::MachineID)(text.substring(text.indexOf('-') + 1, text.length())).toInt();
+            rm.claim(claimId, currUser);
+            bot->answerCallbackQuery(currMsg.query_id, "Successfully claimed " + laundry::Machine::getNameById(claimId));
         }
         if (text.substring(0, 7) == "unclaim") {  // unclaim machine
-            int unclaim_id = (text.substring(text.indexOf('-') + 1, text.length())).toInt();
-            String res = rm.unclaim(unclaim_id, curr_user);
-            bot->answerCallbackQuery(curr_msg.query_id,
-                                     res != ""
-                                         ? "Successfully unclaimed " + res
+            laundry::MachineID unclaimId = (laundry::MachineID)(text.substring(text.indexOf('-') + 1, text.length())).toInt();
+            bool success = rm.unclaim(unclaimId, currUser);
+            bot->answerCallbackQuery(currMsg.query_id,
+                                     success
+                                         ? "Successfully unclaimed " + laundry::Machine::getNameById(unclaimId)
                                          : "You have not claimed this machine");
         }
     }
@@ -78,11 +75,11 @@ namespace telegram {
      * @param rm The laundry room instance to reference.
      */
     void tg::handle_message(int msg_number, laundry::Room& rm) {
-        auto& curr_msg = bot->messages[msg_number];
-        String text = curr_msg.text;
-        String chat_id = String(curr_msg.chat_id);
+        auto& currMsg = bot->messages[msg_number];
+        String text = currMsg.text;
+        String chat_id = String(currMsg.chat_id);
         if (is_command(text, config::COMMAND_START)) {
-            String from_name = curr_msg.from_name;
+            String from_name = currMsg.from_name;
             bot->sendMessage(chat_id, response_start(from_name), "");
         } else if (is_command(text, config::COMMAND_HELP)) {
             bot->sendMessage(chat_id, response_help(), config::MARKDOWN);
@@ -94,7 +91,7 @@ namespace telegram {
         } else if (is_command(text, config::COMMAND_STATUS)) {
             bot->sendMessage(chat_id, response_status(rm), config::MARKDOWN);
         } else if (is_command(text, config::COMMAND_UNCLAIM)) {
-            auto claimed = rm.get_claimed_machines(curr_msg.from_id);
+            auto claimed = rm.getClaimedMachines(currMsg.from_id);
             bot->sendMessageWithInlineKeyboard(chat_id,
                                                response_unclaim(claimed),
                                                config::MARKDOWN,

@@ -1,80 +1,101 @@
 #include "LaundryRoom/LaundryMachine.h"
 
 namespace laundry {
-    /**
-     * @brief Construct a new Machine:: Machine object.
-     *
-     * @param name_id Unique ID of machine
-     */
-    Machine::Machine(int name_id) {
-        id = name_id;
-        users.assign(2, User());
+    Machine::Machine(MachineID _id, int _gpioPin) {
+        this->id = _id;
+        this->gpioPin = _gpioPin;
     }
 
-    /**
-     * @brief Get the string corresponding to the machine's ID.
-     *
-     * @return String
-     */
-    String Machine::get_name() {
-        return MACHINE_NAME[id];
-    };
+    MachineState Machine::getState() {
+        return currState;
+    }
 
-    /**
-     * @brief Get the string corresponding to the status' ID
-     *
-     * @return String
-     */
-    String Machine::get_status() {
-        String output = MACHINE_STATUS[curr_status];
-        // add user's details if machine is claimed
-        if (users[CURR_USER].name != "") {
+    void Machine::setState(MachineState state) {
+        prevState = currState;
+        currState = state;
+        lastUpdated = millis();
+
+        // machine started, new cycle is unclaimed
+        if (isNewCycle() && currUser.getNotifyState() == NOTIFIED) {
+            claim(User());  // clear previous user
+        }
+
+        if (hasCompletedCycle()) {
+            // user is notified on cycle completion
+            currUser.setNotifyState(CYCLE_COMPLETED);
+        }
+    }
+
+    bool Machine::hasCompletedCycle() {
+        return (prevState == FINISHING) && (currState == READY);
+    }
+
+    bool Machine::isNewCycle() {
+        return (prevState == READY) && (currState == IN_USE);
+    }
+
+    User Machine::getCurrUser() {
+        return currUser;
+    }
+
+    int Machine::getGpioPin() {
+        return gpioPin;
+    }
+
+    String Machine::getName() {
+        return getNameById(id);
+    }
+
+    void Machine::claim(User user) {
+        prevUser = currUser;
+        currUser = user;
+    }
+
+    void Machine::unclaim() {
+        currUser = prevUser;
+        prevUser = User();
+    }
+
+    void Machine::setUserNotified() {
+        currUser.setNotifyState(NOTIFIED);
+    }
+
+    String Machine::getStatusString() {
+        String output = getStatusById(currState);
+
+        if (currUser.isValidUser()) {
             output += " (";
-            output += users[CURR_USER].name;
-            output += " - @" + users[CURR_USER].username;
+            output += currUser.getName();
+            output += " - @" + currUser.getUsername();
             output += ")";
         }
 
         return output;
     }
 
-    /**
-     * @brief Get the string corresponding to the machine's ID.
-     *
-     * @return String
-     */
-    String Machine::get_user_id() {
-        return users[CURR_USER].id;
-    };
-
-    /**
-     * @brief Check if the machine cycle is complete.
-     *
-     * @return bool
-     */
-    bool Machine::has_completed_cycle() {
-        bool completed = (prev_status == ID_FINISHING) && (curr_status == ID_READY);
-        if (completed && status_updated == READY) {
-            status_updated = AWAITING;  // sends message to user when awaiting
+    String Machine::getNameById(MachineID id) {
+        switch (id) {
+        case ID_DRYER_A:
+            return "Coin Dryer";
+        case ID_DRYER_B:
+            return "QR Dryer";
+        case ID_WASHER_A:
+            return "QR Washer";
+        case ID_WASHER_B:
+            return "Coin Washer";
         }
-        return completed;
+        return "Unknown";
     }
 
-    /**
-     * @brief Get whether the user has been informed on the cycle completion.
-     *
-     * @return bool
-     */
-    int Machine::get_status_updated() {
-        return status_updated;
-    }
-
-    /**
-     * @brief Set whether the user has been informed on the cycle completion.
-     *
-     * @param state The desired state.
-     */
-    void Machine::set_status_updated(int state) {
-        status_updated = state;
+    String Machine::getStatusById(MachineState state) {
+        switch (state) {
+        case IN_USE:
+            return "In use";
+        case FINISHING:
+            return "Finishing";
+        case READY:
+            return "Ready";
+        }
+        return "Unknown";
     }
 }

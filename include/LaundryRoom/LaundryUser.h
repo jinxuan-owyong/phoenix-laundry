@@ -1,16 +1,26 @@
 #ifndef LAUNDRY_USER_H
 #define LAUNDRY_USER_H
 
-#include "Arduino.h"
+#include "LaundryRoom/LaundryConfig.h"
 
 namespace laundry {
     class User {
-    public:
-        User(String _name = "", String _id = "", String _username = "");
+    private:
         String name;
-        String id;
+        String telegramId;
         String username;
-        bool notified = false;
+        UserState notifyState = AWAITING_COMPLETION;
+
+    public:
+        User(String _name = "", String _telegramId = "", String _username = "");
+        String getName();
+        UserState getNotifyState();
+        String getTelegramId();
+        String getUsername();
+        void setNotifyState(UserState state);
+        bool isValidUser();
+        bool operator==(User user);
+        bool operator!=(User user);
     };
 }
 #endif  // LAUNDRY_USER_H

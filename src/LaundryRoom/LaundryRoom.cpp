@@ -4,31 +4,39 @@ namespace laundry {
     /**
      * @brief Construct a new Room:: Room object.
      *
-     * @param machine_ids Machines present in the room.
+     * @param _ids Machines present in the room.
+     * @param _config Configuration for reading machine state and GPIO pins
      */
-    Room::Room(std::vector<int> machine_ids, config_t config) {
-        cfg = config;
-        input_pin[ID_DRYER_A] = config.PIN_DRYER_A;
-        input_pin[ID_DRYER_B] = config.PIN_DRYER_B;
-        input_pin[ID_WASHER_A] = config.PIN_WASHER_A;
-        input_pin[ID_WASHER_B] = config.PIN_WASHER_B;
+    Room::Room(std::vector<MachineID> _ids, config_t _config) {
+        // filter unconfigured gpio pins
+        std::vector<MachineID> valid;
+        auto pred = [&_config](MachineID id) {
+            return _config.pins[id] > 0;
+        };
+        std::copy_if(_ids.begin(), _ids.end(), std::back_inserter(valid), pred);
 
-        for (auto& id : machine_ids) {
-            machines.emplace_back(Machine(id));
+        this->config = _config;
+        this->ids = valid;
+
+        // attach gpio pin to machine
+        for (auto& id : valid) {
+            machines.insert({id, Machine(id, _config.pins[id])});
         }
     }
 
     /**
      * @brief Get machines claimed by user.
      *
-     * @param id The user's ID.
-     * @return std::vector<Machine>
+     * @param userId The user's Telegram ID.
+     * @return std::vector<MachineID>
      */
-    std::vector<Machine> Room::get_claimed_machines(String id) {
-        std::vector<laundry::Machine> claimed;
-        for (auto& m : machines) {
-            if (m.users[laundry::CURR_USER].id == id) {
-                claimed.emplace_back(m);
+    std::vector<MachineID> Room::getClaimedMachines(String userId) {
+        std::vector<MachineID> claimed;
+        for (auto& pair : machines) {
+            auto& id = pair.first;
+            auto& machine = pair.second;
+            if (machine.getCurrUser().getTelegramId() == userId) {
+                claimed.emplace_back(id);
             }
         }
         return claimed;
@@ -37,180 +45,84 @@ namespace laundry {
     /**
      * @brief Claim ownership of a machine.
      *
-     * @param machine_id The machine's ID.
-     * @param u User instance.
-     * @return String Name of the machine claimed.
+     * @param id The machine's ID.
+     * @param user User instance.
      */
-    String Room::claim(int machine_id, User u) {
-        String claimed = "";
-        for (auto& m : machines) {
-            if (m.id == machine_id) {
-                std::swap(m.users[PREV_USER], m.users[CURR_USER]);
-                m.users[CURR_USER] = u;
-                claimed = m.get_name();
-            }
-        }
-        return claimed;
+    void Room::claim(MachineID id, User user) {
+        machines[id].claim(user);
     }
 
     /**
      * @brief Unclaim ownership of a machine, if owned.
      *
-     * @param machine_id The machine's ID.
-     * @param u User instance.
-     * @return String Name of the machine unclaimed, or message if failed.
+     * @param id The machine's ID.
+     * @param user User instance.
+     * @return bool true if successful, false otherwise
      */
-    String Room::unclaim(int machine_id, User u) {
-        String unclaimed = "";
-        for (auto& m : machines) {
-            if (m.id == machine_id &&
-                u.id == m.users[CURR_USER].id) {  // confirm user's id matches machine
-                unclaimed = m.get_name();
-                m.users[CURR_USER] = User();
-                std::swap(m.users[PREV_USER], m.users[CURR_USER]);
-            }
+    bool Room::unclaim(MachineID id, User user) {
+        if (machines[id].getCurrUser() != user) {
+            return false;
         }
-        return unclaimed;
-    }
-
-    /**
-     * @brief Fetch the name of the given machine id
-     *
-     * @param machine_id The machine's ID.
-     * @return String
-     */
-    String Room::get_machine_name(int machine_id) {
-        for (auto& m : machines) {
-            if (m.id == machine_id) {
-                return m.get_name();
-            }
-        }
-        return "Unknown";
+        machines[id].unclaim();
+        return true;
     }
 
     /**
      * @brief Fetch the status of the given machine id
      *
-     * @param machine_id The machine's ID.
-     * @return String
+     * @param id The machine's ID.
      */
-    String Room::get_machine_status(int machine_id) {
-        for (auto& m : machines) {
-            if (m.id == machine_id) {
-                return m.get_status();
-            }
+    void Room::setMachineStatus(MachineID id, MachineState state) {
+        if (machines.find(id) == machines.end()) {
+            return;
         }
-        return "Unknown";
+        machines[id].setState(state);
     }
 
-    /**
-     * @brief Fetch the user's telegram id the given machine id
-     *
-     * @param machine_id The machine's ID.
-     * @return String
-     */
-    String Room::get_user_id(int machine_id) {
-        for (auto& m : machines) {
-            if (m.id == machine_id) {
-                return m.get_user_id();
-            }
-        }
-        return "Unknown";
-    }
-
-    /**
-     * @brief Set the status of the given machine id
-     *
-     * @param machine_id The machine's ID.
-     * @param status The status of the machine
-     */
-    void Room::set_machine_status(int machine_id, int status) {
-        for (auto& m : machines) {
-            // reset user data on cycle start
-            if (m.has_completed_cycle() && status == ID_IN_USE) {
-                m.set_status_updated(READY);
-                if (m.users[CURR_USER].notified) {  // new cycle unclaimed
-                    m.users[PREV_USER] = m.users[CURR_USER];
-                    m.users[CURR_USER] = User();
-                }
-            }
-
-            if (m.id == machine_id) {
-                // store previous status to check cycle completion
-                m.prev_status = m.curr_status;
-                m.curr_status = status;
-                break;
-            }
-        }
-    }
-
-    /**
-     * @brief Refresh the status of the given machine id
-     *
-     * @param machine_id The machine's ID.
-     * @return int
-     */
-    int Room::refresh_machine_status(int machine_id, String* debug) {
-        int count_high = 0;
-        int count_low = 0;
-        for (int i = 0; i < cfg.SCAN_NUM_READINGS; ++i) {
-            int reading = analogRead(input_pin[machine_id]);
-            if (reading > cfg.SCAN_THRESHOLD) {
-                ++count_high;
-            } else {
-                ++count_low;
-            }
-            delay(cfg.SCAN_INTERVAL);
-        }
-
-        // additional information
-        if (debug != NULL) {
-            *debug += "High: " + String(count_high) + " ";
-            *debug += "Low: " + String(count_low);
-        }
-
+    MachineState Room::identifyState(int high, int low) {
         // identify machine state
-        if (count_high >= cfg.THRESHOLD_CONSTANT) {
-            return laundry::ID_IN_USE;
-        } else if (count_low >= cfg.THRESHOLD_CONSTANT) {
-            return laundry::ID_READY;
+        if (high >= config.THRESHOLD_CONSTANT) {
+            return IN_USE;
+        } else if (low >= config.THRESHOLD_CONSTANT) {
+            return READY;
         }
-        return laundry::ID_FINISHING;
+        return FINISHING;
     }
 
     /**
-     * @brief Get the top reading from n readings
+     * @brief Read the status of the given machine id
      *
-     * @param n Number of readings
-     * @param threshold Minimum readings to be considered accurate
-     * @param machine_id The machine's ID.
-     * @return int
+     * @param id The machine's ID.
+     * @param debug Pointer to String to extract readings for debugging
+     * @return MachineState
      */
-    int Room::get_best_result(int n, int threshold, int machine_id, String* debug) {
-        std::unordered_map<int, int> results;
-        results[laundry::ID_IN_USE] = 0;
-        results[laundry::ID_FINISHING] = 0;
-        results[laundry::ID_READY] = 0;
-        // results[laundry::ID_OUT_OF_ORDER] = 0;
+    void Room::refreshMachines(String* debug) {
+        for (auto& pair : machines) {
+            int countHigh = 0, countLow = 0;
+            auto& machine = pair.second;
 
-        for (int i = 0; i < n; ++i) {
-            int state = refresh_machine_status(machine_id, debug);
-            if (debug != NULL) {
-                *debug += "Reading " + String(i) + ": " + String(state) + "\n";
+            for (int i = 0; i < config.SCAN_NUM_READINGS; ++i) {
+                int reading = analogRead(machine.getGpioPin());
+                if (reading > config.SCAN_THRESHOLD) {
+                    ++countHigh;
+                } else {
+                    ++countLow;
+                }
+                delay(config.SCAN_INTERVAL);
             }
-            ++results[state];
-            delay(cfg.SCAN_INTERVAL);
-        }
 
-        auto best_result = results.begin();
-        for (auto it = ++results.begin(); it != results.end(); ++it) {
-            if (it->second >= threshold && it->second > best_result->second) {  // count >= threshold
-                best_result = it;
+            MachineState prevState = machine.getState();
+            machine.setState(identifyState(countHigh, countLow));
+            MachineState currState = machine.getState();
+
+            // additional information
+            if (debug != NULL && (prevState != currState)) {
+                *debug += machine.getName() + " - " + machine.getStatusString() + "\n";
+                *debug += "High: " + String(countHigh) + " ";
+                *debug += "Low: " + String(countLow) + "\n";
             }
         }
-
-        // possible bug: all results are not the best
-        return best_result->first;
+        lastUpdated = millis();
     }
 
     /**
@@ -219,18 +131,37 @@ namespace laundry {
      *
      * @return std::vector<Machine>
      */
-    std::vector<Machine> Room::get_completed_machines() {
+    std::vector<Machine> Room::getCompletedMachines() {
         std::vector<Machine> result;
-        for (auto& m : machines) {
-            if (m.has_completed_cycle() &&
-                m.get_status_updated() == AWAITING &&
-                !m.users[CURR_USER].notified) {
-                m.set_status_updated(UPDATED);
-                // prevent double message if another user forgets to claim machine
-                m.users[CURR_USER].notified = true;
-                result.emplace_back(m);
+        for (auto& pair : machines) {
+            auto& machine = pair.second;
+            // user has yet to be notified, runs once
+            bool hasCompletedCycle = machine.getCurrUser().getNotifyState() == CYCLE_COMPLETED;
+            if (hasCompletedCycle) {
+                machine.setUserNotified();
+                result.emplace_back(machine);
             }
         }
         return result;
+    }
+
+    unsigned long Room::getLastUpdated() {
+        return lastUpdated;
+    }
+
+    String Room::getRoomStatus() {
+        String output = "*Laundry Room Status*";
+        for (auto& pair : machines) {
+            auto& machine = pair.second;
+            output += "\n\u2022 ";
+            output += machine.getName();
+            output += ": ";
+            output += machine.getStatusString();
+        }
+        return output;
+    }
+
+    std::vector<MachineID> Room::getMachineIds() {
+        return ids;
     }
 }

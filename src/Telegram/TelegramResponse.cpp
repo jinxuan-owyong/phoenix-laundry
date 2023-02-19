@@ -43,14 +43,7 @@ namespace telegram {
      * @return String
      */
     String response_status(laundry::Room& rm) {
-        String output = "*Laundry Room Status*";
-        for (auto& machine : rm.machines) {
-            output += "\n\u2022 ";
-            output += machine.get_name();
-            output += ": ";
-            output += machine.get_status();
-        }
-        return output;
+        return rm.getRoomStatus();
     }
 
     /**
@@ -59,7 +52,7 @@ namespace telegram {
      * @param claimed Machines currently claimed by user.
      * @return String
      */
-    String response_unclaim(std::vector<laundry::Machine>& claimed) {
+    String response_unclaim(std::vector<laundry::MachineID>& claimed) {
         if (claimed.size() == 0) {
             return "You have not claimed any machines.";
         }
@@ -98,10 +91,11 @@ namespace telegram {
      */
     String keyboard_claim(laundry::Room& rm) {
         std::vector<inlineKeyboardButton> buttons;
-        for (auto& machine : rm.machines) {
+        auto ids = rm.getMachineIds();
+        for (auto& id : ids) {
             inlineKeyboardButton b = {
-                .text = machine.get_name(),
-                .callback_data = "claim-" + String(machine.id)};
+                .text = laundry::Machine::getNameById(id),
+                .callback_data = "claim-" + String(id)};
             buttons.emplace_back(b);
         }
         return generate_inline_keyboard(buttons);
@@ -113,12 +107,12 @@ namespace telegram {
      * @param claimed Machines currently claimed by user.
      * @return String InlineKeyboardMarkup JSON string.
      */
-    String keyboard_unclaim(std::vector<laundry::Machine>& claimed) {
+    String keyboard_unclaim(std::vector<laundry::MachineID>& claimed) {
         std::vector<inlineKeyboardButton> buttons;
-        for (auto& m : claimed) {
+        for (auto& id : claimed) {
             inlineKeyboardButton b = {
-                .text = m.get_name(),
-                .callback_data = "unclaim-" + String(m.id)};
+                .text = laundry::Machine::getNameById(id),
+                .callback_data = "unclaim-" + String(id)};
             buttons.emplace_back(b);
         }
         return generate_inline_keyboard(buttons);
