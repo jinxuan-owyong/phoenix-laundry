@@ -5,7 +5,7 @@
 
 #include <vector>
 
-#include "LaundryConfig.h"
+#include "LaundryRoom/LaundryConfig.h"
 
 namespace config {
     enum {
@@ -52,7 +52,7 @@ namespace config {
     static const String CALLBACK_QUERY = "callback_query";
 
     // Laundry Room
-    static std::vector<int> PHOENIX_LAUNDRY_ROOM = {
+    static std::vector<laundry::MachineID> PHOENIX_LAUNDRY_ROOM = {
         laundry::ID_DRYER_A,
         laundry::ID_DRYER_B,
         laundry::ID_WASHER_A,
