@@ -14,7 +14,7 @@ namespace laundry {
         MachineState identifyState(int high, int low);
 
     public:
-        Room(std::vector<MachineID> _ids, config_t _config);
+        Room(std::vector<MachineID> _ids = {}, config_t _config = laundry::config_t());
         void claim(MachineID id, User user);
         bool unclaim(MachineID id, User user);
         void refreshMachines(String* debug);
