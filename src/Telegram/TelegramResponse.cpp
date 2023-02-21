@@ -6,7 +6,7 @@ namespace telegram {
      *
      * @return String
      */
-    String response_claim() {
+    String responseClaim() {
         return "Which machine would you like to claim?";
     }
 
@@ -15,7 +15,7 @@ namespace telegram {
      *
      * @return String
      */
-    String response_help() {
+    String responseHelp() {
         String output = "*Laundry Bot Help Menu*\n";
         output += "Commands:\n";
         output += "/claim - Tag a dryer/washer to your telegram handle\n";
@@ -32,7 +32,7 @@ namespace telegram {
      * @param name User's name.
      * @return String
      */
-    String response_start(String name) {
+    String responseStart(String name) {
         return "Hello " + name + ", welcome to the Laundry Bot! ";
     }
 
@@ -42,7 +42,7 @@ namespace telegram {
      * @param rm The laundry room instance to reference.
      * @return String
      */
-    String response_status(laundry::Room& rm) {
+    String responseStatus(laundry::Room& rm) {
         return rm.getRoomStatus();
     }
 
@@ -52,7 +52,7 @@ namespace telegram {
      * @param claimed Machines currently claimed by user.
      * @return String
      */
-    String response_unclaim(std::vector<laundry::MachineID>& claimed) {
+    String responseUnclaim(std::vector<laundry::MachineID>& claimed) {
         if (claimed.size() == 0) {
             return "You have not claimed any machines.";
         }
@@ -66,13 +66,13 @@ namespace telegram {
      * @param buttons The inline keyboard buttons.
      * @return String InlineKeyboardMarkup JSON string.
      */
-    String generate_inline_keyboard(std::vector<inlineKeyboardButton>& buttons) {
+    String generateInlineKeyboard(std::vector<inlineKeyboardButton>& buttons) {
         String keyboardJson = "[";
         for (int i = 0; i < buttons.size(); ++i) {
             keyboardJson += "[{\"text\" : ";
             keyboardJson += "\"" + buttons[i].text + "\",";
             keyboardJson += "\"callback_data\" : ";
-            keyboardJson += "\"" + buttons[i].callback_data + "\"";
+            keyboardJson += "\"" + buttons[i].callbackData + "\"";
             keyboardJson += "}]";
 
             if (i != buttons.size() - 1) {
@@ -89,16 +89,16 @@ namespace telegram {
      * @param rm The laundry room instance to reference.
      * @return String InlineKeyboardMarkup JSON string.
      */
-    String keyboard_claim(laundry::Room& rm) {
+    String keyboardClaim(laundry::Room& rm) {
         std::vector<inlineKeyboardButton> buttons;
         auto ids = rm.getMachineIds();
         for (auto& id : ids) {
             inlineKeyboardButton b = {
                 .text = laundry::Machine::getNameById(id),
-                .callback_data = "claim-" + String(id)};
+                .callbackData = "claim-" + String(id)};
             buttons.emplace_back(b);
         }
-        return generate_inline_keyboard(buttons);
+        return generateInlineKeyboard(buttons);
     }
 
     /**
@@ -107,14 +107,14 @@ namespace telegram {
      * @param claimed Machines currently claimed by user.
      * @return String InlineKeyboardMarkup JSON string.
      */
-    String keyboard_unclaim(std::vector<laundry::MachineID>& claimed) {
+    String keyboardUnclaim(std::vector<laundry::MachineID>& claimed) {
         std::vector<inlineKeyboardButton> buttons;
         for (auto& id : claimed) {
             inlineKeyboardButton b = {
                 .text = laundry::Machine::getNameById(id),
-                .callback_data = "unclaim-" + String(id)};
+                .callbackData = "unclaim-" + String(id)};
             buttons.emplace_back(b);
         }
-        return generate_inline_keyboard(buttons);
+        return generateInlineKeyboard(buttons);
     }
 }

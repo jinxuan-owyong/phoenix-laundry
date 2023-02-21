@@ -15,15 +15,16 @@ namespace telegram {
     class tg {
     private:
         UniversalTelegramBot* bot = NULL;
-        void handle_callback(int msg_number, laundry::Room& rm);
-        void handle_message(int msg_number, laundry::Room& rm);
-        static bool is_command(const String& msg, const String& cmd);
+        void handleCallback(int msg_number, laundry::Room& rm);
+        void handleMessage(int msg_number, laundry::Room& rm);
+        static bool isCommand(const String& msg, const String& cmd);
 
     public:
+        tg() {}
         tg(const char* token, WiFiClientSecure& client);
         unsigned long lastTimeBotRan = 0;
-        void check_updates(laundry::Room& rm);
-        void send_message(String msg, String target, String keyboard = "");
+        void checkUpdates(laundry::Room& rm);
+        void sendMessage(String msg, String target, String keyboard = "");
     };
 }
 

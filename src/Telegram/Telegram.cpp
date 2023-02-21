@@ -17,7 +17,7 @@ namespace telegram {
      *
      * @param rm The laundry room instance to reference.
      */
-    void tg::check_updates(laundry::Room& rm) {
+    void tg::checkUpdates(laundry::Room& rm) {
         int numNewMessages = bot->getUpdates(bot->last_message_received + 1);
         while (numNewMessages) {
             Serial.print("new message: ");
@@ -33,9 +33,9 @@ namespace telegram {
                 Serial.println(text);
 
                 if (currMsg.type == config::CALLBACK_QUERY) {
-                    handle_callback(i, rm);
+                    handleCallback(i, rm);
                 } else {
-                    handle_message(i, rm);
+                    handleMessage(i, rm);
                 }
             }
             numNewMessages = bot->getUpdates(bot->last_message_received + 1);
@@ -49,7 +49,7 @@ namespace telegram {
      * @param msg_number Message number as determined by UniversalTelegramBot::getUpdates().
      * @param rm The laundry room instance to reference.
      */
-    void tg::handle_callback(int msg_number, laundry::Room& rm) {
+    void tg::handleCallback(int msg_number, laundry::Room& rm) {
         auto& currMsg = bot->messages[msg_number];
         String text = currMsg.text;
         laundry::User currUser(currMsg.from_name, currMsg.from_id, currMsg.username);
@@ -74,28 +74,28 @@ namespace telegram {
      * @param msg_number Message number as determined by UniversalTelegramBot::getUpdates().
      * @param rm The laundry room instance to reference.
      */
-    void tg::handle_message(int msg_number, laundry::Room& rm) {
+    void tg::handleMessage(int msg_number, laundry::Room& rm) {
         auto& currMsg = bot->messages[msg_number];
         String text = currMsg.text;
         String chat_id = String(currMsg.chat_id);
-        if (is_command(text, config::COMMAND_START)) {
+        if (isCommand(text, config::COMMAND_START)) {
             String from_name = currMsg.from_name;
-            bot->sendMessage(chat_id, response_start(from_name), "");
-        } else if (is_command(text, config::COMMAND_HELP)) {
-            bot->sendMessage(chat_id, response_help(), config::MARKDOWN);
-        } else if (is_command(text, config::COMMAND_CLAIM)) {
+            bot->sendMessage(chat_id, responseStart(from_name), "");
+        } else if (isCommand(text, config::COMMAND_HELP)) {
+            bot->sendMessage(chat_id, responseHelp(), config::MARKDOWN);
+        } else if (isCommand(text, config::COMMAND_CLAIM)) {
             bot->sendMessageWithInlineKeyboard(chat_id,
-                                               response_claim(),
+                                               responseClaim(),
                                                config::MARKDOWN,
-                                               keyboard_claim(rm));
-        } else if (is_command(text, config::COMMAND_STATUS)) {
-            bot->sendMessage(chat_id, response_status(rm), config::MARKDOWN);
-        } else if (is_command(text, config::COMMAND_UNCLAIM)) {
+                                               keyboardClaim(rm));
+        } else if (isCommand(text, config::COMMAND_STATUS)) {
+            bot->sendMessage(chat_id, responseStatus(rm), config::MARKDOWN);
+        } else if (isCommand(text, config::COMMAND_UNCLAIM)) {
             auto claimed = rm.getClaimedMachines(currMsg.from_id);
             bot->sendMessageWithInlineKeyboard(chat_id,
-                                               response_unclaim(claimed),
+                                               responseUnclaim(claimed),
                                                config::MARKDOWN,
-                                               keyboard_unclaim(claimed));
+                                               keyboardUnclaim(claimed));
         }
     }
 
@@ -107,7 +107,7 @@ namespace telegram {
      * @return true Input matches command.
      * @return false Input does not match command, input is an invalid command
      */
-    bool tg::is_command(const String& msg, const String& cmd) {
+    bool tg::isCommand(const String& msg, const String& cmd) {
         return (cmd == msg || cmd == msg.substring(0, cmd.length()));
     }
 
@@ -118,7 +118,7 @@ namespace telegram {
      * @param target Target ID (user, group, channel).
      * @param keyboard InlineKeyboardMarkup JSON string, optional.
      */
-    void tg::send_message(String msg, String target, String keyboard) {
+    void tg::sendMessage(String msg, String target, String keyboard) {
         bot->sendMessageWithInlineKeyboard(target, msg, config::MARKDOWN, keyboard);
     }
 }

@@ -11,17 +11,17 @@ namespace telegram {
     // https://core.telegram.org/bots/api#inlinekeyboardmarkup
     struct inlineKeyboardButton {
         String text;
-        String callback_data;
+        String callbackData;
     };
 
-    String response_claim();
-    String response_help();
-    String response_start(String name);
-    String response_status(laundry::Room& rm);
-    String response_unclaim(std::vector<laundry::MachineID>& claimed);
-    String generate_inline_keyboard(std::vector<inlineKeyboardButton>& buttons);
-    String keyboard_claim(laundry::Room& rm);
-    String keyboard_unclaim(std::vector<laundry::MachineID>& claimed);
+    String responseClaim();
+    String responseHelp();
+    String responseStart(String name);
+    String responseStatus(laundry::Room& rm);
+    String responseUnclaim(std::vector<laundry::MachineID>& claimed);
+    String generateInlineKeyboard(std::vector<inlineKeyboardButton>& buttons);
+    String keyboardClaim(laundry::Room& rm);
+    String keyboardUnclaim(std::vector<laundry::MachineID>& claimed);
 }
 
 #endif  // TELEGRAM_RESPONSE_H
