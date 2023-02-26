@@ -44,15 +44,6 @@ namespace config {
     static const String GROUP_ID_DEV = "";
     static const String GROUP_ID_PROD = "";
 
-    static const String COMMAND_CLAIM = "/claim";
-    static const String COMMAND_HELP = "/help";
-    static const String COMMAND_RESTART = "/restart";
-    static const String COMMAND_START = "/start";
-    static const String COMMAND_STATUS = "/status";
-    static const String COMMAND_UNCLAIM = "/unclaim";
-    static const String MARKDOWN = "Markdown";
-    static const String CALLBACK_QUERY = "callback_query";
-
     // users with admin privileges
     static std::unordered_set<std::string> AUTHORISED_USERS = {};
 
