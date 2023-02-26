@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 
+#include <unordered_set>
 #include <vector>
 
 #include "LaundryRoom/LaundryConfig.h"
@@ -45,11 +46,15 @@ namespace config {
 
     static const String COMMAND_CLAIM = "/claim";
     static const String COMMAND_HELP = "/help";
+    static const String COMMAND_RESTART = "/restart";
     static const String COMMAND_START = "/start";
     static const String COMMAND_STATUS = "/status";
     static const String COMMAND_UNCLAIM = "/unclaim";
     static const String MARKDOWN = "Markdown";
     static const String CALLBACK_QUERY = "callback_query";
+
+    // users with admin privileges
+    static std::unordered_set<std::string> AUTHORISED_USERS = {};
 
     // Laundry Room
     static std::vector<laundry::MachineID> PHOENIX_LAUNDRY_ROOM = {

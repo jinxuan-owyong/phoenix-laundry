@@ -18,6 +18,7 @@ namespace telegram {
         void handleCallback(int msg_number, laundry::Room& rm);
         void handleMessage(int msg_number, laundry::Room& rm);
         static bool isCommand(const String& msg, const String& cmd);
+        static bool isAuthorisedUser(const String userId);
 
     public:
         tg() {}

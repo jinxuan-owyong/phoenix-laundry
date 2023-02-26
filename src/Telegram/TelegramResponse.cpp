@@ -117,4 +117,23 @@ namespace telegram {
         }
         return generateInlineKeyboard(buttons);
     }
+
+    /**
+     * @brief Generate inline keyboard with yes and no options.
+     * Adds callbackId to the front of callback data of button.
+     *
+     * @param callbackId Prefix to be checked in callback data.
+     * @return String inline keyboard buttons with callback data
+     * <callbackId>-yes or <callbackId>-no
+     */
+    String keyboardConfirm(String callbackId) {
+        inlineKeyboardButton btnYes = {
+            .text = "Yes",
+            .callbackData = callbackId + "-yes"};
+        inlineKeyboardButton btnNo = {
+            .text = "No",
+            .callbackData = callbackId + "-no"};
+        std::vector<inlineKeyboardButton> btns = {btnYes, btnNo};
+        return generateInlineKeyboard(btns);
+    }
 }

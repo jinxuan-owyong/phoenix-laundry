@@ -66,6 +66,18 @@ namespace telegram {
                                          ? "Successfully unclaimed " + laundry::Machine::getNameById(unclaimId)
                                          : "You have not claimed this machine");
         }
+        if (text == "restart-yes") {
+            if (!isAuthorisedUser(currMsg.from_id)) {
+                bot->answerCallbackQuery(currMsg.query_id, RESPONSE_UNAUTHORISED);
+            } else {
+                bot->answerCallbackQuery(currMsg.query_id, RESPONSE_RESTARTING);
+                delay(config::MESSAGE_INTERVAL);
+                ESP.restart();
+            }
+        }
+        if (text == "restart-no") {
+            bot->answerCallbackQuery(currMsg.query_id);
+        }
     }
 
     /**
@@ -96,6 +108,17 @@ namespace telegram {
                                                responseUnclaim(claimed),
                                                config::MARKDOWN,
                                                keyboardUnclaim(claimed));
+        } else if (isCommand(text, config::COMMAND_RESTART)) {
+            if (!isAuthorisedUser(currMsg.from_id)) {
+                bot->sendMessage(chat_id, RESPONSE_UNAUTHORISED);
+                return;
+            }
+
+            // user is authorised, get restart confirmation
+            bot->sendMessageWithInlineKeyboard(chat_id,
+                                               RESPONSE_CONFIRM_RESTART,
+                                               config::MARKDOWN,
+                                               keyboardConfirm("restart"));
         }
     }
 
@@ -120,5 +143,17 @@ namespace telegram {
      */
     void tg::sendMessage(String msg, String target, String keyboard) {
         bot->sendMessageWithInlineKeyboard(target, msg, config::MARKDOWN, keyboard);
+    }
+
+    /**
+     * @brief Check if the user has elevated privileges
+     *
+     * @param userId Telegram User ID
+     * @return true User is authorised
+     * @return false User is unauthorised
+     */
+    bool tg::isAuthorisedUser(const String userId) {
+        // Arduino string is not hashable, convert to std::string
+        return (config::AUTHORISED_USERS.find(std::string(userId.c_str())) != config::AUTHORISED_USERS.end());
     }
 }

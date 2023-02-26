@@ -22,6 +22,11 @@ namespace telegram {
     String generateInlineKeyboard(std::vector<inlineKeyboardButton>& buttons);
     String keyboardClaim(laundry::Room& rm);
     String keyboardUnclaim(std::vector<laundry::MachineID>& claimed);
+    String keyboardConfirm(String callbackId);
+
+    static const String RESPONSE_UNAUTHORISED = "You are not authorised to perform this action.";
+    static const String RESPONSE_CONFIRM_RESTART = "Are you sure you want to restart the bot?";
+    static const String RESPONSE_RESTARTING = "Restarting bot.";
 }
 
 #endif  // TELEGRAM_RESPONSE_H
