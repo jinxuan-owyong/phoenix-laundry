@@ -29,6 +29,9 @@ namespace laundry {
         NOTIFIED
     };
 
+    static const int CYCLE_LENGTH_WASHER = 30;
+    static const int CYCLE_LENGTH_DRYER = 45;
+
     struct config_t {
         int SCAN_INTERVAL = 10;       // time taken for each scan
         int SCAN_THRESHOLD = 1600;    // threshold for LED state (12-bit ADC)

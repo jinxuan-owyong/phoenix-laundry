@@ -15,6 +15,10 @@ namespace laundry {
         currState = state;
         lastUpdated = millis();
 
+        if (isNewCycle()) {
+            cycleStartTime = millis();
+        }
+
         // machine started, new cycle is unclaimed
         if (isNewCycle() && currUser.getNotifyState() == NOTIFIED) {
             claim(User());  // clear previous user
@@ -60,14 +64,21 @@ namespace laundry {
         currUser.setNotifyState(NOTIFIED);
     }
 
-    String Machine::getStatusString() {
-        String output = getStatusById(currState);
+    String Machine::getStatusString(int cycleDuration) {
+        String output = "";
+
+        unsigned long cycleTimeMillis = millis() - cycleStartTime;
+        int cycleTimeMins = cycleTimeMillis / 1000 / 60;
+        if (currState != READY && cycleTimeMins <= cycleDuration) {
+            output += String(cycleDuration - cycleTimeMins) + " minute(s) remaining";
+        } else {
+            output += getStatusById(READY);
+        }
 
         if (currUser.isValidUser()) {
-            output += " (";
+            output += "\n  👤 ";
             output += currUser.getName();
-            output += " - @" + currUser.getUsername();
-            output += ")";
+            output += " (@" + currUser.getUsername() + ")";
         }
 
         return output;

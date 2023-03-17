@@ -12,6 +12,7 @@ namespace laundry {
         MachineState prevState = FINISHING;
         MachineState currState = READY;
         unsigned long lastUpdated = 0;
+        unsigned long cycleStartTime = 0;
         User currUser;
         User prevUser;
 
@@ -23,7 +24,7 @@ namespace laundry {
         int getGpioPin();
         String getName();
         MachineState getState();
-        String getStatusString();
+        String getStatusString(int cycleDuration);
         void setState(MachineState state);
         void setUserNotified();
         bool hasCompletedCycle();

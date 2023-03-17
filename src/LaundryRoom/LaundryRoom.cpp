@@ -117,7 +117,7 @@ namespace laundry {
 
             // additional information
             if (debug != NULL && (prevState != currState)) {
-                *debug += machine.getName() + " - " + machine.getStatusString() + "\n";
+                *debug += machine.getName() + " - " + machine.getStatusString(0) + "\n";
                 *debug += "High: " + String(countHigh) + " ";
                 *debug += "Low: " + String(countLow) + "\n";
             }
@@ -153,10 +153,12 @@ namespace laundry {
         String output = "*Laundry Room Status*";
         for (auto& pair : machines) {
             auto& machine = pair.second;
+            bool isWasher = pair.first == ID_WASHER_A || pair.first == ID_WASHER_B;
             output += "\n\u2022 ";
             output += machine.getName();
             output += ": ";
-            output += machine.getStatusString();
+            output += machine.getStatusString(isWasher ? CYCLE_LENGTH_WASHER
+                                                       : CYCLE_LENGTH_DRYER);
         }
         return output;
     }
