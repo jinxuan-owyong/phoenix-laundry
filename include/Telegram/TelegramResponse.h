@@ -17,6 +17,7 @@ namespace telegram {
     String responseClaim();
     String responseHelp();
     String responseStart(String name);
+    String responseStats();
     String responseStatus(laundry::Room& rm);
     String responseUnclaim(std::vector<laundry::MachineID>& claimed);
     String generateInlineKeyboard(std::vector<inlineKeyboardButton>& buttons);

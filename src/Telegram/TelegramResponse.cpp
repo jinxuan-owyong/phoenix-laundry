@@ -37,6 +37,21 @@ namespace telegram {
     }
 
     /**
+     * @brief Get heap usage statistics
+     *
+     * @return String
+     */
+    String responseStats() {
+        uint32_t freeHeap = ESP.getFreeHeap();
+        uint32_t minFreeHeap = ESP.getMinFreeHeap();
+        uint32_t totalHeap = ESP.getHeapSize();
+        String result = "Current heap available: " + String(freeHeap) + " " + String(freeHeap / totalHeap * 100);
+        result += "% used\nMin free heap: " + String(minFreeHeap) + " " + String((totalHeap - minFreeHeap) / totalHeap * 100);
+        result += "% used";
+        return result;
+    }
+
+    /**
      * @brief Response for /status.
      *
      * @param rm The laundry room instance to reference.

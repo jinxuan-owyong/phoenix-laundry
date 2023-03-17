@@ -16,6 +16,7 @@ namespace telegram {
     static const String COMMAND_HELP = "/help";
     static const String COMMAND_RESTART = "/restart";
     static const String COMMAND_START = "/start";
+    static const String COMMAND_STATS = "/stats";
     static const String COMMAND_STATUS = "/status";
     static const String COMMAND_UNCLAIM = "/unclaim";
     static const String MARKDOWN = "Markdown";

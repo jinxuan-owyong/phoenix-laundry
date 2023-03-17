@@ -119,6 +119,13 @@ namespace telegram {
                                                RESPONSE_CONFIRM_RESTART,
                                                MARKDOWN,
                                                keyboardConfirm("restart"));
+        } else if (isCommand(text, COMMAND_STATS)) {
+            if (!isAuthorisedUser(currMsg.from_id)) {
+                bot->sendMessage(chat_id, RESPONSE_UNAUTHORISED);
+                return;
+            }
+            
+            bot->sendMessage(chat_id, responseStats());
         }
     }
 
