@@ -10,6 +10,7 @@
 - [Documentation](#documentation)
   - [Features](#features)
   - [Bot usage](#bot-usage)
+  - [Product Demo](#product-demo)
   - [Hardware setup](#hardware-setup)
 
 ## Setup
@@ -46,6 +47,14 @@
 | `start`   | Initialise bot                                     |
 | `status`  | Get the status of the laundry room                 |
 | `unclaim` | Untag a dryer/washer that you accidentally claimed |
+
+### Product Demo
+
+| Image                                                                 | Description                                                                                                                                                   |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <img src="img/telegram_demo1.jpg" alt="Telegram Demo 1" width="500"/> | Using `/status`, the user is able to access the real-time status of the laundry machines.                                                                     |
+| <img src="img/telegram_demo2.jpg" alt="Telegram Demo 2" width="500"/> | Using `/claim`, the user can choose to subscribe to notifications when the next laundry cycle is complete.                                                    |
+| <img src="img/telegram_demo3.jpg" alt="Telegram Demo 3" width="500"/> | The current user's information is made available when another user uses `/status`. <br />The user also receives a message when the machine cycle is complete. |
 
 ### Hardware setup 
 ![Hardware schematic](./img/schematic.png)
